@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 5%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 5%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5%;
+
+    --primary: 0 0% 5%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 93%;
+    --secondary-foreground: 0 0% 5%;
+
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 5%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 5%;
+    --input: 0 0% 5%;
+    --ring: 0 0% 5%;
+
+    --radius: 0.75rem;
+
+    --shadow-gum: 4px 4px 0px hsl(0 0% 5%);
+    --shadow-gum-sm: 2px 2px 0px hsl(0 0% 5%);
+    --shadow-gum-hover: 2px 2px 0px hsl(0 0% 5%);
+    --shadow-gum-active: 0px 0px 0px hsl(0 0% 5%);
+
+    --font-sans: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 5%;
+    --sidebar-primary: 0 0% 5%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 93%;
+    --sidebar-accent-foreground: 0 0% 5%;
+    --sidebar-border: 0 0% 5%;
+    --sidebar-ring: 0 0% 5%;
+  }
+
+  .dark {
+    --background: 0 0% 5%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 18%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 95%;
+    --input: 0 0% 95%;
+    --ring: 0 0% 95%;
+    --shadow-gum: 4px 4px 0px hsl(0 0% 95%);
+    --shadow-gum-sm: 2px 2px 0px hsl(0 0% 95%);
+    --shadow-gum-hover: 2px 2px 0px hsl(0 0% 95%);
+    --shadow-gum-active: 0px 0px 0px hsl(0 0% 95%);
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 0 0% 95%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 95%;
+    --sidebar-ring: 0 0% 95%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer utilities {
+  .gum-shadow {
+    box-shadow: var(--shadow-gum);
+  }
+  .gum-shadow-sm {
+    box-shadow: var(--shadow-gum-sm);
+  }
+  .gum-shadow-hover {
+    box-shadow: var(--shadow-gum-hover);
+  }
+  .gum-shadow-active {
+    box-shadow: var(--shadow-gum-active);
+  }
+  .gum-border {
+    @apply border-2 border-foreground;
+  }
+  .gum-card {
+    @apply border-2 border-foreground bg-card rounded-xl;
+    box-shadow: var(--shadow-gum);
+  }
+  .gum-btn {
+    @apply border-2 border-foreground font-semibold rounded-xl px-5 py-2.5 transition-all duration-150 cursor-pointer;
+    box-shadow: var(--shadow-gum);
+  }
+  .gum-btn:hover {
+    box-shadow: var(--shadow-gum-hover);
+    transform: translate(2px, 2px);
+  }
+  .gum-btn:active {
+    box-shadow: var(--shadow-gum-active);
+    transform: translate(4px, 4px);
+  }
+}
