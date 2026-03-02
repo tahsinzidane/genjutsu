@@ -1,0 +1,13 @@
+name: keep alive
+
+on:
+  schedule:
+    - cron: '0 9 */6 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ping app
+        run: curl https://genjutsu-social.vercel.app
