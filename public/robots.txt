@@ -1,14 +1,44 @@
+# ==========================================
+# Robots.txt for Genjutsu (Social Feed)
+# ==========================================
+
+# 1. Main Search Engines (Allow Full Access)
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
 Allow: /
 
+# 2. Artificial Intelligence Bots (Allow for Discovery)
+# OpenAI (ChatGPT)
+User-agent: GPTBot
+Allow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+
+# Google AI (Gemini)
+User-agent: Google-Extended
+Allow: /
+
+# CCBot (Common Crawl / AI datasets)
+User-agent: CCBot
+Allow: /
+
+# 3. Social Media Scrapers (Allow for Preview Cards)
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
+# 4. Standard Rules for All Other Bots
 User-agent: *
 Allow: /
+Crawl-delay: 5
+
+# Sitemaps (Good for SEO)
+Sitemap: https://genjutsu-social.vercel.app/sitemap.xml
