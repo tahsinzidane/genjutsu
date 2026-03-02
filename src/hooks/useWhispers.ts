@@ -71,7 +71,9 @@ export function useWhispers(targetUserId?: string) {
             return (profiles || []).map(p => ({
                 ...p,
                 ...groups[p.user_id]
-            })) as Conversation[];
+            })).sort((a, b) =>
+                new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+            ) as Conversation[];
         },
         enabled: !!user,
     });
@@ -118,29 +120,42 @@ export function useWhispers(targetUserId?: string) {
     useEffect(() => {
         if (!user) return;
 
-        const channel = sb
-            .channel("whispers-changes")
-            .on(
-                "postgres_changes",
-                {
-                    event: "INSERT",
-                    schema: "public",
-                    table: "messages",
-                    filter: `receiver_id=eq.${user.id}`,
-                },
-                () => {
-                    queryClient.invalidateQueries({ queryKey: ["conversations", user?.id] });
-                    if (targetUserId) {
-                        queryClient.invalidateQueries({ queryKey: ["whispers", user?.id, targetUserId] });
+        let channel: any = null;
+        let cancelled = false;
+
+        // Small delay to avoid StrictMode double-mount WebSocket churn
+        const timer = setTimeout(() => {
+            if (cancelled) return;
+
+            channel = sb
+                .channel(`whispers-rt-${user.id}-${Date.now()}`)
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "INSERT",
+                        schema: "public",
+                        table: "messages",
+                        filter: `receiver_id=eq.${user.id}`,
+                    },
+                    () => {
+                        queryClient.invalidateQueries({ queryKey: ["conversations", user?.id] });
+                        if (targetUserId) {
+                            queryClient.invalidateQueries({ queryKey: ["whispers", user?.id, targetUserId] });
+                        }
                     }
-                }
-            )
-            .subscribe();
+                )
+                .subscribe();
+        }, 100);
 
         return () => {
-            sb.removeChannel(channel);
+            cancelled = true;
+            clearTimeout(timer);
+            if (channel) {
+                channel.unsubscribe();
+                sb.removeChannel(channel).catch(() => { });
+            }
         };
-    }, [user, targetUserId, queryClient, sb]);
+    }, [user?.id, targetUserId, queryClient]);
 
     return {
         conversations,

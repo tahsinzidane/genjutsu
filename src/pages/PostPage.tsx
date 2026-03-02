@@ -263,15 +263,23 @@ const PostPage = () => {
                                             comments.map((comment) => (
                                                 <div key={comment.id} className="gum-card p-4 bg-background/50">
                                                     <div className="flex gap-3">
-                                                        <div className="w-8 h-8 rounded-[3px] gum-border bg-secondary flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
+                                                        <button
+                                                            onClick={() => navigate(`/${comment.profiles?.username}`)}
+                                                            className="w-8 h-8 rounded-[3px] gum-border bg-secondary flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden hover:opacity-80 transition-opacity"
+                                                        >
                                                             {comment.profiles?.avatar_url ? (
                                                                 <img src={comment.profiles.avatar_url} alt={comment.profiles.username} className="w-full h-full object-cover" />
                                                             ) : comment.profiles?.display_name?.[0] || "?"}
-                                                        </div>
+                                                        </button>
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2 mb-1">
-                                                                <span className="font-bold text-xs">{comment.profiles?.display_name}</span>
-                                                                <span className="text-[10px] text-muted-foreground">@{comment.profiles?.username}</span>
+                                                                <button
+                                                                    onClick={() => navigate(`/${comment.profiles?.username}`)}
+                                                                    className="flex items-center gap-2 group text-left"
+                                                                >
+                                                                    <span className="font-bold text-xs group-hover:underline">{comment.profiles?.display_name}</span>
+                                                                    <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors">@{comment.profiles?.username}</span>
+                                                                </button>
                                                                 <span className="text-[10px] text-muted-foreground opacity-60">• {formatDistanceToNow(new Date(comment.created_at))} ago</span>
                                                             </div>
                                                             <p className="text-sm whitespace-pre-wrap">{comment.content}</p>

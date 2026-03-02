@@ -88,7 +88,13 @@ const ChatPage = () => {
                     <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <button
-                                onClick={() => navigate("/whispers")}
+                                onClick={() => {
+                                    if (window.history.length > 2) {
+                                        navigate(-1);
+                                    } else {
+                                        navigate("/whispers");
+                                    }
+                                }}
                                 className="p-2 hover:bg-secondary rounded-lg transition-colors"
                             >
                                 <ArrowLeft size={18} />

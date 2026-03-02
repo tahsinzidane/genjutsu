@@ -22,7 +22,13 @@ const WhispersPage = () => {
                     <div className="space-y-6">
                         <div className="flex items-center gap-4">
                             <button
-                                onClick={() => navigate(-1)}
+                                onClick={() => {
+                                    if (window.history.length > 2) {
+                                        navigate(-1);
+                                    } else {
+                                        navigate("/");
+                                    }
+                                }}
                                 className="p-2 hover:bg-secondary rounded-lg transition-colors border-2 border-transparent hover:border-border"
                             >
                                 <ArrowLeft size={20} />
