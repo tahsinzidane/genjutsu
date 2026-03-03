@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,12 +32,18 @@ const HomeScreen = ({
   challengingUserId = null,
 }: HomeScreenProps) => {
   const [nickname, setNickname] = useState(() => {
-    // If logged in, prefer display name
     if (isLoggedIn && displayName) return displayName;
     return localStorage.getItem('genjutsu-play-name') || '';
   });
   const [roomCode, setRoomCode] = useState('');
   const [mode, setMode] = useState<'home' | 'join'>('home');
+
+  // Sync nickname when displayName loads asynchronously (profile loads after mount)
+  useEffect(() => {
+    if (isLoggedIn && displayName && !nickname) {
+      setNickname(displayName);
+    }
+  }, [isLoggedIn, displayName]);
 
   const handleCreate = () => {
     if (!nickname.trim()) return;
