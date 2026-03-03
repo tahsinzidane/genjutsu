@@ -74,10 +74,10 @@ const HomeScreen = ({
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-md space-y-6 text-center relative z-10"
+        className="w-full max-w-md space-y-4 sm:space-y-6 text-center relative z-10"
       >
         {/* Logo */}
-        <div className="space-y-4">
+        <div className="space-y-2 sm:space-y-4">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -86,8 +86,8 @@ const HomeScreen = ({
           >
             <div className="relative">
               <div className="absolute inset-0 bg-foreground/20 rounded-2xl blur-xl" />
-              <div className="relative bg-card glass-border rounded-2xl p-3 text-primary">
-                <Swords className="h-10 w-10" />
+              <div className="relative bg-card glass-border rounded-xl sm:rounded-2xl p-2 sm:p-3 text-primary">
+                <Swords className="h-7 w-7 sm:h-10 w-10" />
               </div>
             </div>
           </motion.div>
@@ -95,7 +95,7 @@ const HomeScreen = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-5xl font-black tracking-tight gradient-text"
+            className="text-3xl sm:text-5xl font-black tracking-tight gradient-text"
           >
             GENJUTSU PLAY
           </motion.h1>
@@ -103,7 +103,7 @@ const HomeScreen = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-muted-foreground text-sm"
+            className="text-muted-foreground text-xs sm:text-sm px-4"
           >
             {isLoggedIn ? 'Challenge your friends or play with anyone' : 'Play mini games with friends, peer-to-peer'}
           </motion.p>
@@ -126,10 +126,10 @@ const HomeScreen = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="flex items-center gap-3"
+            className="flex items-center gap-3 px-4"
           >
             <div className="flex-1 h-px bg-border/50" />
-            <span className="text-xs text-muted-foreground/50 font-medium">or play with room code</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground/50 font-medium whitespace-nowrap">or play with room code</span>
             <div className="flex-1 h-px bg-border/50" />
           </motion.div>
         )}
@@ -139,7 +139,7 @@ const HomeScreen = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: isLoggedIn ? 0.45 : 0.35 }}
-          className="glass glass-border rounded-2xl p-6 space-y-5 glow-sm"
+          className="glass glass-border rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-5 glow-sm mx-2"
         >
           {!isLoggedIn && (
             <Input
@@ -147,7 +147,7 @@ const HomeScreen = ({
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               maxLength={20}
-              className="h-13 text-center text-lg bg-secondary/60 border-border/50 focus:border-foreground/30 focus:glow-sm transition-all placeholder:text-muted-foreground/60"
+              className="h-10 sm:h-13 text-center text-base sm:text-lg bg-secondary/60 border-border/50 focus:border-foreground/30 focus:glow-sm transition-all placeholder:text-muted-foreground/60"
             />
           )}
 
@@ -155,23 +155,23 @@ const HomeScreen = ({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex gap-3"
+              className="flex gap-2 sm:gap-3"
             >
               <Button
                 onClick={handleCreate}
                 disabled={!nickname.trim()}
-                className="flex-1 h-14 text-base font-semibold gap-2 glow-sm hover:glow-md transition-shadow"
+                className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold gap-2 glow-sm hover:glow-md transition-shadow"
               >
-                <Plus className="h-5 w-5" />
+                <Plus className="h-4 w-4 sm:h-5 w-5" />
                 Create Room
               </Button>
               <Button
                 onClick={() => setMode('join')}
                 variant="outline"
                 disabled={!nickname.trim()}
-                className="flex-1 h-14 text-base font-semibold gap-2 border-border/50 hover:bg-accent hover:border-foreground/20 transition-all"
+                className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold gap-2 border-border/50 hover:bg-accent hover:border-foreground/20 transition-all"
               >
-                <LogIn className="h-5 w-5" />
+                <LogIn className="h-4 w-4 sm:h-5 w-5" />
                 Join Room
               </Button>
             </motion.div>
@@ -188,20 +188,20 @@ const HomeScreen = ({
                 value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                 maxLength={6}
-                className="h-13 text-center text-xl font-mono tracking-[0.3em] bg-secondary/60 border-border/50 focus:border-foreground/30 transition-all placeholder:tracking-normal placeholder:text-base placeholder:font-sans"
+                className="h-10 sm:h-13 text-center text-lg sm:text-xl font-mono tracking-[0.2em] sm:tracking-[0.3em] bg-secondary/60 border-border/50 focus:border-foreground/30 transition-all placeholder:tracking-normal placeholder:text-sm sm:placeholder:text-base placeholder:font-sans"
               />
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <Button
                   variant="outline"
                   onClick={() => { setMode('home'); setRoomCode(''); }}
-                  className="flex-1 h-12 border-border/50"
+                  className="flex-1 h-10 sm:h-12 border-border/50 text-sm sm:text-base"
                 >
                   Back
                 </Button>
                 <Button
                   onClick={handleJoin}
                   disabled={!roomCode.trim() || roomCode.length < 6}
-                  className="flex-1 h-12 font-semibold glow-sm hover:glow-md transition-shadow"
+                  className="flex-1 h-10 sm:h-12 font-semibold glow-sm hover:glow-md transition-shadow text-sm sm:text-base"
                 >
                   Join
                 </Button>
