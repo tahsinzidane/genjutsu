@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const urlRegex = /(https?:\/\/[^\s]+)/g;
-const mentionRegex = /(@[a-zA-Z0-9_]+)/g;
+const mentionRegex = /((?:^|\s)@[a-zA-Z0-9_]+)/g;
 
 export function linkify(text: string) {
     if (!text) return text;
@@ -31,16 +31,21 @@ export function linkify(text: string) {
 
         // Then, split by mentions for non-URL parts
         return part.split(mentionRegex).map((subPart, j) => {
-            if (mentionRegex.test(subPart)) {
-                const username = subPart.slice(1);
+            if (subPart.includes('@')) {
+                const mention = subPart.trim();
+                const username = mention.slice(1);
+                const leadingSpace = subPart.startsWith(' ') ? ' ' : '';
+
                 return (
-                    <Link
-                        key={`mention-${i}-${j}`}
-                        to={`/${username}`}
-                        className="text-primary font-bold hover:underline"
-                    >
-                        {subPart}
-                    </Link>
+                    <React.Fragment key={`mention-${i}-${j}`}>
+                        {leadingSpace}
+                        <Link
+                            to={`/${username}`}
+                            className="text-primary font-bold hover:underline"
+                        >
+                            {mention}
+                        </Link>
+                    </React.Fragment>
                 );
             }
             return subPart;

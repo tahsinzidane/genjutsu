@@ -77,7 +77,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
 
     const cursorPosition = e.target.selectionStart;
     const textBeforeCursor = val.substring(0, cursorPosition);
-    const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
+    const mentionMatch = textBeforeCursor.match(/(?:^|\s)@(\w*)$/);
 
     if (mentionMatch) {
       const query = mentionMatch[1];
@@ -172,7 +172,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute bottom-full left-0 mb-2 w-72 gum-card bg-background/95 backdrop-blur-sm shadow-xl z-50 overflow-hidden border border-primary/20"
+                className="absolute bottom-full left-0 mb-2 w-64 gum-card bg-background/95 backdrop-blur-sm shadow-xl z-50 overflow-hidden border border-primary/20"
               >
                 <div className="p-2 border-b border-secondary bg-secondary/30">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Mention User</span>

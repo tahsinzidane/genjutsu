@@ -155,7 +155,7 @@ const PostPage = () => {
 
         const cursorPosition = e.target.selectionStart;
         const textBeforeCursor = val.substring(0, cursorPosition);
-        const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
+        const mentionMatch = textBeforeCursor.match(/(?:^|\s)@(\w*)$/);
 
         if (mentionMatch) {
             const query = mentionMatch[1];
