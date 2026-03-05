@@ -5,7 +5,7 @@ import { PostWithProfile } from "@/hooks/usePosts";
 import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
-import { Loader2, ArrowLeft, Calendar, ImageIcon, Send, Bookmark } from "lucide-react";
+import { Loader2, ArrowLeft, Calendar, ImageIcon, Send, Bookmark, Github, Twitter, Facebook, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -33,6 +33,7 @@ interface ProfileData {
     bio: string;
     avatar_url: string;
     banner_url: string;
+    social_links?: Record<string, string>;
     created_at: string;
 }
 
@@ -360,7 +361,8 @@ const ProfilePage = () => {
                                                         display_name: profile.display_name,
                                                         bio: profile.bio,
                                                         avatar_url: profile.avatar_url,
-                                                        banner_url: profile.banner_url
+                                                        banner_url: profile.banner_url,
+                                                        social_links: profile.social_links
                                                     }}
                                                     onUpdate={fetchData}
                                                 />
@@ -397,6 +399,36 @@ const ProfilePage = () => {
                                         <p className="mt-4 text-sm leading-relaxed max-w-xl whitespace-pre-wrap">
                                             {profile.bio ? linkify(profile.bio) : "No bio yet."}
                                         </p>
+
+                                        {profile.social_links && Object.values(profile.social_links).some(link => link) && (
+                                            <div className="flex flex-wrap gap-3 mt-4">
+                                                {Object.entries(profile.social_links).map(([platform, link]) => {
+                                                    if (!link) return null;
+
+                                                    const formattedLink = link.startsWith('http') ? link : `https://${link}`;
+                                                    const icons: Record<string, any> = {
+                                                        github: Github,
+                                                        twitter: Twitter,
+                                                        facebook: Facebook,
+                                                        website: Globe
+                                                    };
+                                                    const Icon = icons[platform] || Globe;
+
+                                                    return (
+                                                        <a
+                                                            key={platform}
+                                                            href={formattedLink}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="p-2 gum-card bg-secondary/50 text-muted-foreground hover:text-primary hover:bg-secondary transition-all hover:scale-110 active:scale-95"
+                                                            title={platform.charAt(0).toUpperCase() + platform.slice(1)}
+                                                        >
+                                                            <Icon size={18} />
+                                                        </a>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
 
                                         <div className="flex flex-wrap gap-4 mt-6 text-sm text-muted-foreground">
                                             <div className="flex items-center gap-1.5">

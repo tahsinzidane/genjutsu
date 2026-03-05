@@ -21,6 +21,7 @@ interface EditProfileDialogProps {
         bio: string;
         avatar_url: string | null;
         banner_url: string | null;
+        social_links?: Record<string, string>;
     };
     onUpdate: () => void;
 }
@@ -30,10 +31,12 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
     const [bio, setBio] = useState(currentProfile.bio || "");
     const [avatarUrl, setAvatarUrl] = useState(currentProfile.avatar_url || "");
     const [bannerUrl, setBannerUrl] = useState(currentProfile.banner_url || "");
+    const [socialLinks, setSocialLinks] = useState<Record<string, string>>(currentProfile.social_links || {});
     const [submitting, setSubmitting] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [uploadingBanner, setUploadingBanner] = useState(false);
     const [showUrls, setShowUrls] = useState(false);
+    const [showSocials, setShowSocials] = useState(false);
     const [open, setOpen] = useState(false);
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -45,8 +48,9 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             setBio(currentProfile.bio || "");
             setAvatarUrl(currentProfile.avatar_url || "");
             setBannerUrl(currentProfile.banner_url || "");
+            setSocialLinks(currentProfile.social_links || {});
         }
-    }, [open, currentProfile]);
+    }, [open]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners') => {
         const file = e.target.files?.[0];
@@ -128,6 +132,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                     bio: bio,
                     avatar_url: avatarUrl,
                     banner_url: bannerUrl,
+                    social_links: socialLinks,
                     updated_at: getNow().toISOString(),
                 })
                 .eq("user_id", user.id);
@@ -260,6 +265,44 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                         className="gum-border focus-visible:ring-primary min-h-[180px] text-lg p-5 bg-background resize-none"
                                         placeholder="Write something about yourself..."
                                     />
+                                </div>
+
+                                {/* Social Links Section */}
+                                <div className="pt-6 border-t border-foreground/5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSocials(!showSocials)}
+                                        className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-all p-3 rounded-xl hover:bg-secondary/50 w-full justify-between"
+                                    >
+                                        <div className="flex items-center gap-2 uppercase tracking-widest">
+                                            <LinkIcon size={14} />
+                                            {showSocials ? "Hide Social Platforms" : "Add Social Platforms"}
+                                        </div>
+                                        {showSocials ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                    </button>
+
+                                    {showSocials && (
+                                        <div className="mt-4 space-y-4 p-6 bg-secondary/5 rounded-2xl gum-border animate-in slide-in-from-top-4 duration-300">
+                                            {[
+                                                { id: 'github', label: 'GitHub', placeholder: 'github.com/username' },
+                                                { id: 'twitter', label: 'Twitter / X', placeholder: 'twitter.com/username' },
+                                                { id: 'facebook', label: 'Facebook', placeholder: 'facebook.com/username' },
+                                                { id: 'website', label: 'Website', placeholder: 'yourwebsite.com' }
+                                            ].map((platform) => (
+                                                <div key={platform.id} className="space-y-2">
+                                                    <Label htmlFor={platform.id} className="text-[10px] font-black uppercase tracking-wider opacity-60">
+                                                        {platform.label} link</Label>
+                                                    <Input
+                                                        id={platform.id}
+                                                        value={socialLinks[platform.id] || ""}
+                                                        onChange={(e) => setSocialLinks(prev => ({ ...prev, [platform.id]: e.target.value }))}
+                                                        className="h-11 text-sm gum-border focus-visible:ring-primary bg-background"
+                                                        placeholder={platform.placeholder}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* URL Toggles */}
