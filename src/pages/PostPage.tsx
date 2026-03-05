@@ -342,22 +342,23 @@ const PostPage = () => {
                                                                                 />
 
                                                                                 <div className="absolute right-0 mt-1 z-20 min-w-[110px] gum-card bg-background p-1 shadow-xl border border-secondary">
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        disabled={deletingCommentId === comment.id}
-                                                                                        onClick={() => handleDeleteComment(comment.id)}
-                                                                                        className="w-full text-left px-2 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 rounded-[3px] transition-colors disabled:opacity-50"
-                                                                                    >
-                                                                                        {deletingCommentId === comment.id ? (
-                                                                                            <span className="flex items-center gap-2">
-                                                                                                <Loader2 size={10} className="animate-spin" /> Deleting...
-                                                                                            </span>
-                                                                                        ) : (
-                                                                                            <>
-                                                                                                <Trash2 size={14} />Delete Echo
-                                                                                            </>
-                                                                                        )}
-                                                                                    </button>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            disabled={deletingCommentId === comment.id}
+                                                                                            onClick={() => handleDeleteComment(comment.id)}
+                                                                                            className="w-full flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 rounded-[3px] transition-colors disabled:opacity-50"
+                                                                                        >
+                                                                                            {deletingCommentId === comment.id ? (
+                                                                                                <span className="flex items-center gap-2">
+                                                                                                    <Loader2 size={10} className="animate-spin" /> Deleting...
+                                                                                                </span>
+                                                                                            ) : (
+                                                                                                <>
+                                                                                                    <Trash2 size={14} />
+                                                                                                    <span>Delete Echo</span>
+                                                                                                </>
+                                                                                            )}
+                                                                                        </button>
                                                                                 </div>
                                                                             </>
                                                                         )}
