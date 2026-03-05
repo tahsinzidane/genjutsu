@@ -120,7 +120,7 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
             )}
           </div>
 
-          <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">
+          <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap break-words">
             {linkify(post.content)}
           </p>
 

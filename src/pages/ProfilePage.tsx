@@ -23,6 +23,7 @@ import {
 
 import { useFollow } from "@/hooks/useFollow";
 import { usePostActions } from "@/hooks/usePostActions";
+import { linkify } from "@/lib/linkify";
 
 interface ProfileData {
     id: string;
@@ -393,8 +394,8 @@ const ProfilePage = () => {
                                             <p className="text-muted-foreground">@{profile.username}</p>
                                         </div>
 
-                                        <p className="mt-4 text-sm leading-relaxed max-w-xl">
-                                            {profile.bio || "No bio yet."}
+                                        <p className="mt-4 text-sm leading-relaxed max-w-xl whitespace-pre-wrap">
+                                            {profile.bio ? linkify(profile.bio) : "No bio yet."}
                                         </p>
 
                                         <div className="flex flex-wrap gap-4 mt-6 text-sm text-muted-foreground">
