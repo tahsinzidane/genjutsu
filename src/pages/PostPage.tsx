@@ -5,7 +5,7 @@ import { PostWithProfile } from "@/hooks/usePosts";
 import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
-import { Loader2, ArrowLeft, Send, MessageSquare } from "lucide-react";
+import { Loader2, ArrowLeft, Send, MessageSquare, MoreHorizontal, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
@@ -19,9 +19,12 @@ const PostPage = () => {
     const [loading, setLoading] = useState(true);
     const [commentText, setCommentText] = useState("");
     const [submittingComment, setSubmittingComment] = useState(false);
+    const [openCommentMenuId, setOpenCommentMenuId] = useState<string | null>(null);
+    const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
     const { user } = useAuth();
     const navigate = useNavigate();
     const { toggleLike, toggleBookmark, deletePost } = usePostActions();
+
 
     const fetchPost = async () => {
         if (!postId) return;
@@ -174,6 +177,30 @@ const PostPage = () => {
         }
     };
 
+    const handleDeleteComment = async (commentId: string) => {
+        if (!user || deletingCommentId) return;
+
+        try {
+            setDeletingCommentId(commentId);
+            const { error } = await supabase
+                .from("comments")
+                .delete()
+                .eq("id", commentId)
+                .eq("user_id", user.id);
+
+            if (error) throw error;
+
+            setComments(prev => prev.filter(comment => comment.id !== commentId));
+            setPost(prev => prev ? { ...prev, comments_count: Math.max(0, prev.comments_count - 1) } : null);
+            setOpenCommentMenuId(null);
+            toast.success("Comment deleted");
+        } catch (err) {
+            toast.error("Failed to delete comment");
+        } finally {
+            setDeletingCommentId(null);
+        }
+    };
+
     const pageTitle = post ? `${post.profiles?.display_name || "User"}: "${post.content.substring(0, 30)}${post.content.length > 30 ? '...' : ''}" — genjutsu` : "Post — genjutsu";
     const pageDesc = post ? post.content.substring(0, 160) : "View this post on genjutsu.";
 
@@ -272,15 +299,70 @@ const PostPage = () => {
                                                             ) : comment.profiles?.display_name?.[0] || "?"}
                                                         </button>
                                                         <div className="flex-1">
+                                                            {/* Header Part containing the Menu */}
                                                             <div className="flex items-center gap-2 mb-1">
                                                                 <button
                                                                     onClick={() => navigate(`/${comment.profiles?.username}`)}
                                                                     className="flex items-center gap-2 group text-left"
                                                                 >
-                                                                    <span className="font-bold text-xs group-hover:underline">{comment.profiles?.display_name}</span>
-                                                                    <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors">@{comment.profiles?.username}</span>
+                                                                    <span className="font-bold text-xs group-hover:underline">
+                                                                        {comment.profiles?.display_name}
+                                                                    </span>
+                                                                    <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors">
+                                                                        @{comment.profiles?.username}
+                                                                    </span>
                                                                 </button>
-                                                                <span className="text-[10px] text-muted-foreground opacity-60">• {formatDistanceToNow(new Date(comment.created_at))} ago</span>
+
+                                                                <span className="text-[10px] text-muted-foreground opacity-60">
+                                                                    • {formatDistanceToNow(new Date(comment.created_at))} ago
+                                                                </span>
+
+                                                                {/* Only show menu if the logged-in user is the author of the comment */}
+                                                                {user?.id === comment.user_id && (
+                                                                    <div className="relative ml-auto">
+                                                                        <button
+                                                                            type="button"
+                                                                            aria-label="Open comment menu"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation(); // Bubbling stop korbe
+                                                                                setOpenCommentMenuId(openCommentMenuId === comment.id ? null : comment.id);
+                                                                            }}
+                                                                            className="p-1 rounded-[3px] hover:bg-secondary transition-colors"
+                                                                        >
+                                                                            <MoreHorizontal size={16} className="text-muted-foreground" />
+                                                                        </button>
+
+                                                                        {/* Delete Popup Menu */}
+                                                                        {openCommentMenuId === comment.id && (
+                                                                            <>
+                                                                                {/* Invisible backdrop to close menu when clicking outside */}
+                                                                                <div
+                                                                                    className="fixed inset-0 z-10"
+                                                                                    onClick={() => setOpenCommentMenuId(null)}
+                                                                                />
+
+                                                                                <div className="absolute right-0 mt-1 z-20 min-w-[110px] gum-card bg-background p-1 shadow-xl border border-secondary">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        disabled={deletingCommentId === comment.id}
+                                                                                        onClick={() => handleDeleteComment(comment.id)}
+                                                                                        className="w-full text-left px-2 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 rounded-[3px] transition-colors disabled:opacity-50"
+                                                                                    >
+                                                                                        {deletingCommentId === comment.id ? (
+                                                                                            <span className="flex items-center gap-2">
+                                                                                                <Loader2 size={10} className="animate-spin" /> Deleting...
+                                                                                            </span>
+                                                                                        ) : (
+                                                                                            <>
+                                                                                                <Trash2 size={14} />Delete Echo
+                                                                                            </>
+                                                                                        )}
+                                                                                    </button>
+                                                                                </div>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                             <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
                                                         </div>
