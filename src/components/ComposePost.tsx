@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Code, ImageIcon, Smile, Send, X, Loader2 } from "lucide-react";
+import { useMentions } from "@/hooks/useMentions";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -18,7 +19,13 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { profile } = useProfile();
+
+  // Mention state
+  const { suggestions, fetchSuggestions, clearSuggestions } = useMentions();
+  const [mentionSearch, setMentionSearch] = useState("");
+  const [mentionIndex, setMentionIndex] = useState(-1);
 
   const extractTags = (text: string): string[] => {
     // Unicode-aware regex to match hashtags in any language
@@ -61,6 +68,42 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
       console.error("Upload error:", err);
       toast.error("Failed to upload image. Make sure 'post-media' bucket exists.");
       return null;
+    }
+  };
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setContent(val);
+
+    const cursorPosition = e.target.selectionStart;
+    const textBeforeCursor = val.substring(0, cursorPosition);
+    const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
+
+    if (mentionMatch) {
+      const query = mentionMatch[1];
+      setMentionSearch(query);
+      setMentionIndex(cursorPosition - query.length - 1);
+      fetchSuggestions(query);
+    } else {
+      setMentionSearch("");
+      clearSuggestions();
+    }
+  };
+
+  const insertMention = (username: string) => {
+    if (mentionIndex === -1) return;
+
+    const before = content.substring(0, mentionIndex);
+    const after = content.substring(mentionIndex + mentionSearch.length + 1);
+    const newText = `${before}@${username} ${after}`;
+
+    setContent(newText);
+    setMentionSearch("");
+    clearSuggestions();
+
+    // Focus back on textarea
+    if (textareaRef.current) {
+      textareaRef.current.focus();
     }
   };
 
@@ -113,14 +156,54 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
             <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
           ) : initials}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 relative">
           <textarea
+            ref={textareaRef}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Share what you're building... (use #tags)"
+            onChange={handleTextareaChange}
+            placeholder="Share what you're building... (use #tags or @mentions)"
             className="w-full bg-transparent resize-none outline-none text-sm placeholder:text-muted-foreground min-h-[60px]"
             rows={2}
           />
+
+          <AnimatePresence>
+            {suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute bottom-full left-0 mb-2 w-72 gum-card bg-background/95 backdrop-blur-sm shadow-xl z-50 overflow-hidden border border-primary/20"
+              >
+                <div className="p-2 border-b border-secondary bg-secondary/30">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Mention User</span>
+                </div>
+                <div className="max-h-60 overflow-y-auto">
+                  {suggestions.map((profile) => (
+                    <button
+                      key={profile.id}
+                      type="button"
+                      onClick={() => insertMention(profile.username)}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-primary hover:text-primary-foreground transition-all group border-b border-secondary/10 last:border-0 text-left"
+                    >
+                      <div className="w-10 h-10 rounded-[3px] gum-border bg-secondary overflow-hidden shrink-0 group-hover:border-primary-foreground/30">
+                        {profile.avatar_url ? (
+                          <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center font-bold text-sm uppercase">
+                            {profile.display_name[0]}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm truncate leading-none">{profile.display_name}</p>
+                        <p className="text-xs opacity-70 truncate mt-1">@{profile.username}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
             {mediaPreview && (

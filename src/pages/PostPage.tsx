@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PostWithProfile } from "@/hooks/usePosts";
 import Navbar from "@/components/Navbar";
@@ -12,6 +12,8 @@ import { Helmet } from "react-helmet-async";
 import { formatDistanceToNow } from "date-fns";
 import { usePostActions } from "@/hooks/usePostActions";
 import { linkify } from "@/lib/linkify";
+import { useMentions } from "@/hooks/useMentions";
+import { AnimatePresence, motion } from "framer-motion";
 
 
 const PostPage = () => {
@@ -24,6 +26,12 @@ const PostPage = () => {
     const [openCommentMenuId, setOpenCommentMenuId] = useState<string | null>(null);
     const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
     const { user } = useAuth();
+
+    // Mention state
+    const { suggestions, fetchSuggestions, clearSuggestions } = useMentions();
+    const [mentionSearch, setMentionSearch] = useState("");
+    const [mentionIndex, setMentionIndex] = useState(-1);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const navigate = useNavigate();
     const { toggleLike, toggleBookmark, deletePost } = usePostActions();
 
@@ -138,6 +146,42 @@ const PostPage = () => {
             toast.error("Failed to add comment");
         } finally {
             setSubmittingComment(false);
+        }
+    };
+
+    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const val = e.target.value;
+        setCommentText(val);
+
+        const cursorPosition = e.target.selectionStart;
+        const textBeforeCursor = val.substring(0, cursorPosition);
+        const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
+
+        if (mentionMatch) {
+            const query = mentionMatch[1];
+            setMentionSearch(query);
+            setMentionIndex(cursorPosition - query.length - 1);
+            fetchSuggestions(query);
+        } else {
+            setMentionSearch("");
+            clearSuggestions();
+        }
+    };
+
+    const insertMention = (username: string) => {
+        if (mentionIndex === -1) return;
+
+        const before = commentText.substring(0, mentionIndex);
+        const after = commentText.substring(mentionIndex + mentionSearch.length + 1);
+        const newText = `${before}@${username} ${after}`;
+
+        setCommentText(newText);
+        setMentionSearch("");
+        clearSuggestions();
+
+        // Focus back on textarea
+        if (textareaRef.current) {
+            textareaRef.current.focus();
         }
     };
 
@@ -260,14 +304,55 @@ const PostPage = () => {
                                     {user && (
                                         <form onSubmit={handleComment} className="gum-card p-4 mb-6">
                                             <div className="flex gap-3">
-                                                <div className="flex-1">
+                                                <div className="flex-1 relative">
                                                     <textarea
+                                                        ref={textareaRef}
                                                         value={commentText}
-                                                        onChange={(e) => setCommentText(e.target.value)}
+                                                        onChange={handleTextareaChange}
                                                         placeholder="Add your reflection..."
                                                         className="w-full bg-transparent resize-none outline-none text-sm placeholder:text-muted-foreground min-h-[60px]"
                                                         rows={2}
                                                     />
+
+                                                    <AnimatePresence>
+                                                        {suggestions.length > 0 && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, y: 10 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                exit={{ opacity: 0, y: 10 }}
+                                                                className="absolute bottom-full left-0 mb-2 w-64 gum-card bg-background/95 backdrop-blur-sm shadow-xl z-50 overflow-hidden border border-primary/20"
+                                                            >
+                                                                <div className="p-2 border-b border-secondary bg-secondary/30">
+                                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Mention User</span>
+                                                                </div>
+                                                                <div className="max-h-48 overflow-y-auto">
+                                                                    {suggestions.map((profile) => (
+                                                                        <button
+                                                                            key={profile.id}
+                                                                            type="button"
+                                                                            onClick={() => insertMention(profile.username)}
+                                                                            className="w-full flex items-center gap-3 p-2.5 hover:bg-primary hover:text-primary-foreground transition-all group border-b border-secondary/10 last:border-0 text-left"
+                                                                        >
+                                                                            <div className="w-8 h-8 rounded-[3px] gum-border bg-secondary overflow-hidden shrink-0 group-hover:border-primary-foreground/30">
+                                                                                {profile.avatar_url ? (
+                                                                                    <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
+                                                                                ) : (
+                                                                                    <div className="w-full h-full flex items-center justify-center font-bold text-xs uppercase">
+                                                                                        {profile.display_name[0]}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <p className="font-bold text-xs truncate leading-none">{profile.display_name}</p>
+                                                                                <p className="text-[10px] opacity-70 truncate mt-0.5">@{profile.username}</p>
+                                                                            </div>
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+
                                                     <div className="flex justify-end mt-2 pt-2 border-t border-secondary">
                                                         <button
                                                             type="submit"
