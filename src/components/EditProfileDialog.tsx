@@ -65,21 +65,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Authentication required");
 
-            // --- AUTO-DELETE OLD FILE ---
-            const oldUrl = isAvatar ? avatarUrl : bannerUrl;
-            if (oldUrl && oldUrl.includes(supabase.storage.from(bucket).getPublicUrl('').data.publicUrl)) {
-                try {
-                    const oldPath = oldUrl.split(`${bucket}/`).pop();
-                    if (oldPath) {
-                        await supabase.storage.from(bucket).remove([oldPath]);
-                        console.log(`Deleted old ${bucket.slice(0, -1)}:`, oldPath);
-                    }
-                } catch (deleteError) {
-                    console.error(`Error deleting old ${bucket}:`, deleteError);
-                    // We don't throw here to ensure the new upload still proceeds
-                }
-            }
-            // ----------------------------
+            // Old file cleanup is handled in handleSubmit's cleanupOldFile()
 
             const fileExt = file.name.split('.').pop();
             const filePath = `${user.id}/${Math.random()}.${fileExt}`;

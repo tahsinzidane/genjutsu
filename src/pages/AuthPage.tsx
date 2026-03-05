@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Eye, EyeOff, Sparkles, ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
+import { Eye, EyeOff, Sparkles, ArrowLeft, Mail } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { z } from "zod";
 import { Helmet } from "react-helmet-async";
 
@@ -20,6 +20,7 @@ const signInSchema = z.object({
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -29,9 +30,10 @@ const AuthPage = () => {
   const [success, setSuccess] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signIn, signUp, signInWithGoogle, signInWithGitHub } = useAuth();
   const navigate = useNavigate();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [githubLoading, setGithubLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,164 +178,247 @@ const AuthPage = () => {
               transition={{ delay: 0.2 }}
               className="gum-card p-8 bg-background shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border-primary/10"
             >
-              <div className="flex p-1 bg-secondary rounded-xl mb-8">
-                {["Sign In", "Sign Up"].map((tab, i) => (
-                  <button
-                    key={tab}
-                    onClick={() => { setIsSignUp(i === 1); setError(""); setSuccess(""); }}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-300 ${(i === 0 && !isSignUp) || (i === 1 && isSignUp)
-                      ? "bg-background text-foreground shadow-md scale-[1.02]"
-                      : "text-muted-foreground hover:text-foreground"
-                      }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {isSignUp && (
+              <AnimatePresence mode="wait">
+                {!showEmailForm ? (
+                  /* ===== MAIN VIEW: OAuth + Email Entry Point ===== */
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="space-y-5 overflow-hidden"
+                    key="oauth-view"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
                   >
-                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-2 block">
-                        Username
-                      </label>
-                      <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="cooldev42"
-                        className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
-                        required
-                      />
+                    <div className="text-center mb-6">
+                      <h2 className="text-xl font-black mb-1">Welcome</h2>
+                      <p className="text-sm text-muted-foreground">Choose how you'd like to continue</p>
                     </div>
-                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-2 block">
-                        Display Name
-                      </label>
-                      <input
-                        type="text"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder="Cool Developer"
-                        className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
-                        required
-                      />
+
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="text-xs font-bold bg-destructive/10 text-destructive px-4 py-3 rounded-xl border-2 border-destructive/20"
+                      >
+                        {error}
+                      </motion.div>
+                    )}
+
+                    <button
+                      onClick={async () => {
+                        setGoogleLoading(true);
+                        setError("");
+                        const { error } = await signInWithGoogle();
+                        if (error) {
+                          setError(error.message || "Google sign-in failed");
+                          setGoogleLoading(false);
+                        }
+                      }}
+                      disabled={googleLoading}
+                      className="w-full gum-btn bg-background gum-border text-sm py-4 flex items-center justify-center gap-3 hover:bg-secondary hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
+                    >
+                      {googleLoading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <Sparkles className="animate-pulse" size={16} />
+                          Redirecting...
+                        </span>
+                      ) : (
+                        <>
+                          <svg width="20" height="20" viewBox="0 0 48 48">
+                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                          </svg>
+                          <span className="font-bold">Continue with Google</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        setGithubLoading(true);
+                        setError("");
+                        const { error } = await signInWithGitHub();
+                        if (error) {
+                          setError(error.message || "GitHub sign-in failed");
+                          setGithubLoading(false);
+                        }
+                      }}
+                      disabled={githubLoading}
+                      className="w-full gum-btn bg-background gum-border text-sm py-4 flex items-center justify-center gap-3 hover:bg-secondary hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
+                    >
+                      {githubLoading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <Sparkles className="animate-pulse" size={16} />
+                          Redirecting...
+                        </span>
+                      ) : (
+                        <>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                          </svg>
+                          <span className="font-bold">Continue with GitHub</span>
+                        </>
+                      )}
+                    </button>
+
+                    <div className="flex items-center gap-4 my-4">
+                      <div className="flex-1 h-px bg-foreground/10" />
+                      <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest">or</span>
+                      <div className="flex-1 h-px bg-foreground/10" />
                     </div>
+
+                    <button
+                      onClick={() => { setShowEmailForm(true); setError(""); setSuccess(""); }}
+                      className="w-full gum-btn bg-background gum-border text-sm py-4 flex items-center justify-center gap-3 hover:bg-secondary hover:shadow-md transition-all active:scale-[0.98]"
+                    >
+                      <Mail size={20} />
+                      <span className="font-bold">Continue with Email</span>
+                    </button>
                   </motion.div>
-                )}
-
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-2 block">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@dev.com"
-                    className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-2 block">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 pr-12 transition-all placeholder:text-muted-foreground/30"
-                      required
-                    />
+                ) : (
+                  /* ===== EMAIL FORM VIEW: Sign In / Sign Up ===== */
+                  <motion.div
+                    key="email-view"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => { setShowEmailForm(false); setError(""); setSuccess(""); }}
+                      className="inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors mb-6 group"
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                      All sign in options
                     </button>
-                  </div>
-                </div>
 
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="text-xs font-bold bg-destructive/10 text-destructive px-4 py-3 rounded-xl border-2 border-destructive/20"
-                  >
-                    {error}
+                    <div className="flex p-1 bg-secondary rounded-xl mb-8">
+                      {["Sign In", "Sign Up"].map((tab, i) => (
+                        <button
+                          key={tab}
+                          onClick={() => { setIsSignUp(i === 1); setError(""); setSuccess(""); }}
+                          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-300 ${(i === 0 && !isSignUp) || (i === 1 && isSignUp)
+                            ? "bg-background text-foreground shadow-md scale-[1.02]"
+                            : "text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                          {tab}
+                        </button>
+                      ))}
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                      {isSignUp && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="space-y-5 overflow-hidden"
+                        >
+                          <div>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-2 block">
+                              Username
+                            </label>
+                            <input
+                              type="text"
+                              value={username}
+                              onChange={(e) => setUsername(e.target.value)}
+                              placeholder="cooldev42"
+                              className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-2 block">
+                              Display Name
+                            </label>
+                            <input
+                              type="text"
+                              value={displayName}
+                              onChange={(e) => setDisplayName(e.target.value)}
+                              placeholder="Cool Developer"
+                              className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
+                              required
+                            />
+                          </div>
+                        </motion.div>
+                      )}
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-2 block">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@dev.com"
+                          className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-2 block">
+                          Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 pr-12 transition-all placeholder:text-muted-foreground/30"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {error && (
+                        <motion.div
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="text-xs font-bold bg-destructive/10 text-destructive px-4 py-3 rounded-xl border-2 border-destructive/20"
+                        >
+                          {error}
+                        </motion.div>
+                      )}
+
+                      {success && (
+                        <motion.div
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="text-xs font-bold bg-primary/10 text-foreground px-4 py-3 rounded-xl gum-border"
+                        >
+                          {success}
+                        </motion.div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className="w-full gum-btn bg-primary text-primary-foreground text-sm py-4 font-bold shadow-lg hover:shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 mt-2"
+                      >
+                        {submitting ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <Sparkles className="animate-spin" size={16} />
+                            Processing...
+                          </span>
+                        ) : isSignUp ? "Create Account" : "Sign In"}
+                      </button>
+                    </form>
                   </motion.div>
                 )}
-
-                {success && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="text-xs font-bold bg-primary/10 text-foreground px-4 py-3 rounded-xl gum-border"
-                  >
-                    {success}
-                  </motion.div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full gum-btn bg-primary text-primary-foreground text-sm py-4 font-bold shadow-lg hover:shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 mt-2"
-                >
-                  {submitting ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <Sparkles className="animate-spin" size={16} />
-                      Processing...
-                    </span>
-                  ) : isSignUp ? "Create Account" : "Sign In"}
-                </button>
-              </form>
-
-              <div className="flex items-center gap-4 my-8">
-                <div className="flex-1 h-px bg-foreground/10" />
-                <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest">or</span>
-                <div className="flex-1 h-px bg-foreground/10" />
-              </div>
-
-              <button
-                onClick={async () => {
-                  setGoogleLoading(true);
-                  setError("");
-                  const { error } = await signInWithGoogle();
-                  if (error) {
-                    setError(error.message || "Google sign-in failed");
-                    setGoogleLoading(false);
-                  }
-                }}
-                disabled={googleLoading}
-                className="w-full gum-btn bg-background gum-border text-sm py-4 flex items-center justify-center gap-3 hover:bg-secondary hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
-              >
-                {googleLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Sparkles className="animate-pulse" size={16} />
-                    Redirecting...
-                  </span>
-                ) : (
-                  <>
-                    <svg width="20" height="20" viewBox="0 0 48 48">
-                      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-                      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-                      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-                    </svg>
-                    <span className="font-bold">Continue with Google</span>
-                  </>
-                )}
-              </button>
+              </AnimatePresence>
             </motion.div>
           </div>
         </div>
