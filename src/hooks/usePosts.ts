@@ -109,17 +109,25 @@ export function usePosts() {
   const posts = data?.pages.flat() ?? [];
 
   const createPostMutation = useMutation({
-    mutationFn: async ({ content, code, tags, media_url, is_readme }: { content: string, code: string, tags: string[], media_url?: string, is_readme: boolean }) => {
+    mutationFn: async ({ content, code, tags, media_url, is_readme, idempotency_key }: { content: string, code: string, tags: string[], media_url?: string, is_readme: boolean, idempotency_key: string }) => {
       if (!user) throw new Error("Not authenticated");
-      const { error } = await (supabase.from("posts").insert({
-        user_id: user.id,
-        content,
-        code: code || "",
-        tags,
-        media_url: media_url || "",
-        is_readme,
-      }) as any);
+      const { data, error } = await supabase.rpc("create_post", {
+        p_content: content,
+        p_code: code || "",
+        p_tags: tags,
+        p_media_url: media_url || "",
+        p_is_readme: is_readme,
+        p_idempotency_key: idempotency_key,
+      });
       if (error) throw error;
+
+      const result = data as any;
+      if (result?.error === "cooldown_active") {
+        throw new Error(`COOLDOWN:${result.retry_after}`);
+      }
+      if (result?.error) {
+        throw new Error(result.message || "Failed to create post");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
@@ -127,7 +135,12 @@ export function usePosts() {
       toast.success("Post shared!");
     },
     onError: (error) => {
-      toast.error("Your thoughts couldn't be woven into the world. Please try again.");
+      if (error.message.startsWith("COOLDOWN:")) {
+        const seconds = parseInt(error.message.split(":")[1], 10);
+        toast.error(`Please wait ${seconds}s before posting again.`);
+      } else {
+        toast.error("Your thoughts couldn't be woven into the world. Please try again.");
+      }
     }
   });
 
@@ -139,7 +152,8 @@ export function usePosts() {
         toast.error("Please sign in to share a post");
         return;
       }
-      return createPostMutation.mutateAsync({ content, code, tags, media_url, is_readme });
+      const idempotency_key = crypto.randomUUID();
+      return createPostMutation.mutateAsync({ content, code, tags, media_url, is_readme, idempotency_key });
     },
     toggleLike,
     toggleBookmark,

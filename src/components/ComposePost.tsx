@@ -27,10 +27,26 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { profile } = useProfile();
   const { user } = useAuth();
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   // Mention state
   const { suggestions, fetchSuggestions, clearSuggestions } = useMentions();
@@ -154,6 +170,11 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
       if (mediaPreview) URL.revokeObjectURL(mediaPreview);
       setMediaPreview(null);
     } catch (err: any) {
+      // Check for cooldown error from the server
+      if (err?.message?.startsWith("COOLDOWN:")) {
+        const seconds = parseInt(err.message.split(":")[1], 10);
+        setCooldown(seconds);
+      }
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -300,11 +321,11 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
             </div>
             <button
               onClick={handleSubmit}
-              disabled={!content.trim() || submitting}
+              disabled={!content.trim() || submitting || cooldown > 0}
               className="gum-btn bg-primary text-primary-foreground text-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-              {submitting ? "Posting..." : "Post"}
+              {submitting ? <Loader2 size={14} className="animate-spin" /> : cooldown > 0 ? null : <Send size={14} />}
+              {submitting ? "Posting..." : cooldown > 0 ? `Wait ${cooldown}s` : "Post"}
             </button>
           </div>
         </div>

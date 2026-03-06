@@ -204,12 +204,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_action_log: {
+        Row: {
+          id: string
+          user_id: string
+          action_type: string
+          idempotency_key: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          action_type: string
+          idempotency_key?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          action_type?: string
+          idempotency_key?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_post: {
+        Args: {
+          p_content: string
+          p_code?: string
+          p_tags?: string[]
+          p_media_url?: string
+          p_is_readme?: boolean
+          p_idempotency_key?: string
+        }
+        Returns: Json
+      }
+      create_comment: {
+        Args: {
+          p_post_id: string
+          p_content: string
+          p_idempotency_key?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

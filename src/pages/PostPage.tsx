@@ -124,22 +124,37 @@ const PostPage = () => {
 
         setSubmittingComment(true);
         try {
-            const { data, error } = await supabase
+            const idempotency_key = crypto.randomUUID();
+            const { data: rpcResult, error: rpcError } = await supabase.rpc("create_comment", {
+                p_post_id: postId!,
+                p_content: commentText.trim(),
+                p_idempotency_key: idempotency_key,
+            });
+
+            if (rpcError) throw rpcError;
+
+            const result = rpcResult as any;
+            if (result?.error === "cooldown_active") {
+                toast.error(`Please wait ${result.retry_after}s before commenting again.`);
+                return;
+            }
+            if (result?.error) {
+                throw new Error(result.message || "Failed to add comment");
+            }
+
+            // Fetch the newly created comment with profile data
+            const { data: newComment } = await supabase
                 .from("comments")
-                .insert({
-                    post_id: postId,
-                    user_id: user.id,
-                    content: commentText.trim()
-                })
                 .select(`
                     *,
                     profiles ( username, display_name, avatar_url )
                 `)
+                .eq("id", result.comment_id)
                 .single();
 
-            if (error) throw error;
-
-            setComments(prev => [...prev, data]);
+            if (newComment) {
+                setComments(prev => [...prev, newComment]);
+            }
             setCommentText("");
             setPost(prev => prev ? { ...prev, comments_count: prev.comments_count + 1 } : null);
             toast.success("Echo shared!");

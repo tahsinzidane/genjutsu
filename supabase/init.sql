@@ -96,6 +96,22 @@ CREATE TABLE public.messages (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
+-- User Action Log (for rate limiting cooldowns)
+CREATE TABLE public.user_action_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  action_type TEXT NOT NULL,
+  idempotency_key TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX idx_user_action_idempotency
+  ON public.user_action_log (user_id, idempotency_key)
+  WHERE idempotency_key IS NOT NULL;
+
+CREATE INDEX idx_user_action_lookup
+  ON public.user_action_log (user_id, action_type, created_at DESC);
+
 
 -- =============================================================================
 -- ROW LEVEL SECURITY
@@ -108,6 +124,7 @@ ALTER TABLE public.bookmarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_action_log ENABLE ROW LEVEL SECURITY;
 
 -- Profiles
 CREATE POLICY "Profiles are viewable by everyone"
@@ -117,11 +134,9 @@ CREATE POLICY "Users can insert their own profile"
 CREATE POLICY "Users can update their own profile"
   ON public.profiles FOR UPDATE USING ((select auth.uid()) = user_id);
 
--- Posts
+-- Posts (INSERT blocked — must use create_post() function)
 CREATE POLICY "Posts are viewable by everyone"
   ON public.posts FOR SELECT USING (true);
-CREATE POLICY "Users can create their own posts"
-  ON public.posts FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
 CREATE POLICY "Users can update their own posts"
   ON public.posts FOR UPDATE USING ((select auth.uid()) = user_id);
 CREATE POLICY "Users can delete their own posts"
@@ -151,15 +166,17 @@ CREATE POLICY "Users can follow"
 CREATE POLICY "Users can unfollow"
   ON public.follows FOR DELETE USING ((select auth.uid()) = follower_id);
 
--- Comments
+-- Comments (INSERT blocked — must use create_comment() function)
 CREATE POLICY "Comments are viewable by everyone"
   ON public.comments FOR SELECT USING (true);
-CREATE POLICY "Users can create their own comments"
-  ON public.comments FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
 CREATE POLICY "Users can update their own comments"
   ON public.comments FOR UPDATE USING ((select auth.uid()) = user_id);
 CREATE POLICY "Users can delete their own comments"
   ON public.comments FOR DELETE USING ((select auth.uid()) = user_id);
+
+-- User Action Log
+CREATE POLICY "Users can view own action log"
+  ON public.user_action_log FOR SELECT USING ((select auth.uid()) = user_id);
 
 -- Messages
 CREATE POLICY "Users can view their own messages"
@@ -368,6 +385,144 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
+-- Delete expired action log entries (older than 48h)
+CREATE OR REPLACE FUNCTION public.delete_expired_action_logs()
+RETURNS void AS $$
+BEGIN
+  DELETE FROM public.user_action_log
+  WHERE created_at < now() - INTERVAL '48 hours';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- Schedule cleanups (every hour)
 SELECT cron.schedule('0 * * * *', 'SELECT public.delete_expired_posts()');
 SELECT cron.schedule('5 * * * *', 'SELECT public.delete_expired_whispers()');
+SELECT cron.schedule('10 * * * *', 'SELECT public.delete_expired_action_logs()');
+
+
+-- =============================================================================
+-- SERVER-SIDE RATE-LIMITED FUNCTIONS
+-- =============================================================================
+
+-- create_post: 30s cooldown, idempotency support
+CREATE OR REPLACE FUNCTION public.create_post(
+  p_content TEXT,
+  p_code TEXT DEFAULT '',
+  p_tags TEXT[] DEFAULT '{}',
+  p_media_url TEXT DEFAULT '',
+  p_is_readme BOOLEAN DEFAULT false,
+  p_idempotency_key TEXT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+  v_user_id UUID;
+  v_last_action_at TIMESTAMPTZ;
+  v_seconds_since_last NUMERIC;
+  v_cooldown_seconds INT := 30;
+  v_retry_after INT;
+  v_new_post_id UUID;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RETURN jsonb_build_object('error', 'not_authenticated', 'message', 'You must be signed in');
+  END IF;
+
+  IF p_idempotency_key IS NOT NULL THEN
+    IF EXISTS (
+      SELECT 1 FROM public.user_action_log
+      WHERE user_id = v_user_id AND idempotency_key = p_idempotency_key
+    ) THEN
+      RETURN jsonb_build_object('success', true, 'deduplicated', true);
+    END IF;
+  END IF;
+
+  PERFORM pg_advisory_xact_lock(hashtext('post:' || v_user_id::text));
+
+  SELECT MAX(created_at) INTO v_last_action_at
+  FROM public.user_action_log
+  WHERE user_id = v_user_id AND action_type = 'post';
+
+  IF v_last_action_at IS NOT NULL THEN
+    v_seconds_since_last := EXTRACT(EPOCH FROM (now() - v_last_action_at));
+    IF v_seconds_since_last < v_cooldown_seconds THEN
+      v_retry_after := CEIL(v_cooldown_seconds - v_seconds_since_last)::INT;
+      RETURN jsonb_build_object(
+        'error', 'cooldown_active',
+        'message', 'Please wait before posting again',
+        'retry_after', v_retry_after
+      );
+    END IF;
+  END IF;
+
+  INSERT INTO public.posts (user_id, content, code, tags, media_url, is_readme)
+  VALUES (v_user_id, p_content, p_code, p_tags, p_media_url, p_is_readme)
+  RETURNING id INTO v_new_post_id;
+
+  INSERT INTO public.user_action_log (user_id, action_type, idempotency_key)
+  VALUES (v_user_id, 'post', COALESCE(p_idempotency_key, v_new_post_id::text));
+
+  RETURN jsonb_build_object('success', true, 'post_id', v_new_post_id);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- create_comment: 15s cooldown, idempotency support
+CREATE OR REPLACE FUNCTION public.create_comment(
+  p_post_id UUID,
+  p_content TEXT,
+  p_idempotency_key TEXT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+  v_user_id UUID;
+  v_last_action_at TIMESTAMPTZ;
+  v_seconds_since_last NUMERIC;
+  v_cooldown_seconds INT := 15;
+  v_retry_after INT;
+  v_new_comment_id UUID;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RETURN jsonb_build_object('error', 'not_authenticated', 'message', 'You must be signed in');
+  END IF;
+
+  IF p_idempotency_key IS NOT NULL THEN
+    IF EXISTS (
+      SELECT 1 FROM public.user_action_log
+      WHERE user_id = v_user_id AND idempotency_key = p_idempotency_key
+    ) THEN
+      RETURN jsonb_build_object('success', true, 'deduplicated', true);
+    END IF;
+  END IF;
+
+  PERFORM pg_advisory_xact_lock(hashtext('comment:' || v_user_id::text));
+
+  SELECT MAX(created_at) INTO v_last_action_at
+  FROM public.user_action_log
+  WHERE user_id = v_user_id AND action_type = 'comment';
+
+  IF v_last_action_at IS NOT NULL THEN
+    v_seconds_since_last := EXTRACT(EPOCH FROM (now() - v_last_action_at));
+    IF v_seconds_since_last < v_cooldown_seconds THEN
+      v_retry_after := CEIL(v_cooldown_seconds - v_seconds_since_last)::INT;
+      RETURN jsonb_build_object(
+        'error', 'cooldown_active',
+        'message', 'Please wait before commenting again',
+        'retry_after', v_retry_after
+      );
+    END IF;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public.posts WHERE id = p_post_id) THEN
+    RETURN jsonb_build_object('error', 'post_not_found', 'message', 'Post not found');
+  END IF;
+
+  INSERT INTO public.comments (post_id, user_id, content)
+  VALUES (p_post_id, v_user_id, p_content)
+  RETURNING id INTO v_new_comment_id;
+
+  INSERT INTO public.user_action_log (user_id, action_type, idempotency_key)
+  VALUES (v_user_id, 'comment', COALESCE(p_idempotency_key, v_new_comment_id::text));
+
+  RETURN jsonb_build_object('success', true, 'comment_id', v_new_comment_id);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
