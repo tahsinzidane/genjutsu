@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/theme-provider";
 import { syncTime } from "@/lib/utils";
+import ScrollToTop from "@/components/ScrollToTop";
 
 import Index from "@/pages/Index";
 const AuthPage = lazy(() => import("@/pages/AuthPage"));
@@ -50,6 +51,7 @@ const App = () => {
                 v7_relativeSplatPath: true,
               }}
             >
+              <ScrollToTop />
               <AuthProvider>
                 <Suspense
                   fallback={

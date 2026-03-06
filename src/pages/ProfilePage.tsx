@@ -482,17 +482,17 @@ const ProfilePage = () => {
 
                                         {profile.fav_song && (
                                             <div className="mt-6">
-                                                <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-background border-2 border-foreground rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-in fade-in slide-in-from-top-4 duration-500">
+                                                <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-background border-2 border-foreground rounded-[3px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-in fade-in slide-in-from-top-4 duration-500">
                                                     <div className="relative group shrink-0">
                                                         <img
                                                             src={profile.fav_song.artworkUrl100}
-                                                            className="w-10 h-10 rounded-xl object-cover border-2 border-foreground animate-spin-slow"
+                                                            className="w-10 h-10 rounded-[3px] object-cover border-2 border-foreground animate-spin-slow"
                                                             style={{ animationPlayState: isPlaying ? 'running' : 'paused' }}
                                                             alt=""
                                                         />
                                                         <button
                                                             onClick={togglePlay}
-                                                            className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity text-white"
+                                                            className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-[3px] opacity-0 group-hover:opacity-100 transition-opacity text-white"
                                                         >
                                                             {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
                                                         </button>
@@ -592,7 +592,7 @@ const ProfilePage = () => {
                                     ) : (
                                         bookmarks.length === 0 ? (
                                             <div className="gum-card p-12 text-center flex flex-col items-center gap-4 bg-secondary/20 border-dashed">
-                                                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+                                                <div className="w-16 h-16 rounded-[3px] bg-secondary flex items-center justify-center border-2 border-primary/20">
                                                     <Bookmark size={32} className="text-primary/50" />
                                                 </div>
                                                 <div>
@@ -619,7 +619,7 @@ const ProfilePage = () => {
                         )}
                     </div>
 
-                    <div className="hidden lg:block">
+                    <div className="hidden lg:block lg:sticky lg:top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 custom-scrollbar">
                         <Sidebar />
                     </div>
                 </div>

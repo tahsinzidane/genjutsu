@@ -34,7 +34,7 @@ const PrivacyPage = () => {
                         <p className="text-muted-foreground mt-2">What happens on genjutsu, stays here (for 24 hours).</p>
                     </div>
 
-                    <div className="gum-card p-10 space-y-8 prose prose-invert max-w-none">
+                    <div className="gum-card p-10 space-y-8 prose dark:prose-invert max-w-none">
                         <section className="space-y-4">
                             <div className="flex items-center gap-3">
                                 <Trash2 className="text-primary" size={24} />
@@ -50,7 +50,7 @@ const PrivacyPage = () => {
                                 <EyeOff className="text-primary" size={24} />
                                 <h2 className="text-2xl font-bold m-0 text-foreground">2. Data Minimalists</h2>
                             </div>
-                            <p className="text-sm leading-relaxed text-muted-foreground mt-2">
+                            <p className="text-sm leading-relaxed text-foreground/70 mt-2">
                                 We only collect what we need to run genjutsu: your email, your chosen username, and a hashed password. We don't sell your data to anyone. We don't track your every move across the web.
                             </p>
                         </section>
@@ -60,7 +60,7 @@ const PrivacyPage = () => {
                                 <Lock className="text-primary" size={24} />
                                 <h2 className="text-2xl font-bold m-0 text-foreground">3. Security</h2>
                             </div>
-                            <p className="text-sm leading-relaxed text-muted-foreground mt-2">
+                            <p className="text-sm leading-relaxed text-foreground/70 mt-2">
                                 We use industry-standard encryption for your credentials. However, no database is 100% immune to hacks. We keep things minimal to minimize risk.
                             </p>
                         </section>

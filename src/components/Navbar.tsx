@@ -53,7 +53,7 @@ const Navbar = () => {
               <button
                 key={label}
                 onClick={() => navigate(path)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname === path
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-[3px] text-sm font-medium transition-all ${location.pathname === path
                   ? "bg-primary text-primary-foreground gum-shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   }`}
@@ -70,35 +70,35 @@ const Navbar = () => {
             </div>
             <button
               onClick={() => navigate("/")}
-              className="md:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Feed"
             >
               <Home size={16} />
             </button>
             <button
               onClick={() => navigate("/search")}
-              className="md:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Search"
             >
               <Search size={16} />
             </button>
             <button
               onClick={() => navigate("/play")}
-              className="md:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Play"
             >
               <Swords size={16} />
             </button>
             <button
               onClick={() => navigate("/whispers")}
-              className="md:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Whispers"
             >
               <Send size={16} />
             </button>
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="lg:hidden p-1.5 sm:p-2 rounded-lg hover:bg-secondary text-primary transition-colors gum-border"
+              className="lg:hidden p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary text-primary transition-colors gum-border"
               title="Discovery"
             >
               <Hash size={16} />
@@ -178,7 +178,7 @@ const Navbar = () => {
               >
                 <div className="flex items-center justify-between mb-8">
                   <span className="font-bold tracking-tighter text-xl">Discovery</span>
-                  <button onClick={() => setIsDrawerOpen(false)} className="p-2 hover:bg-secondary rounded-lg transition-colors">
+                  <button onClick={() => setIsDrawerOpen(false)} className="p-2 hover:bg-secondary rounded-[3px] transition-colors">
                     <X size={20} />
                   </button>
                 </div>

@@ -106,7 +106,7 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="p-1 rounded-lg hover:bg-secondary transition-colors"
+                  className="p-1 rounded-[3px] hover:bg-secondary transition-colors"
                 >
                   <MoreHorizontal size={16} className="text-muted-foreground" />
                 </button>
@@ -114,7 +114,7 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
                   <div className="absolute right-0 top-8 gum-card p-1 z-10 min-w-[120px]">
                     <button
                       onClick={() => { onDelete?.(post.id); setShowMenu(false); }}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-secondary rounded-lg transition-colors"
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-secondary rounded-[3px] transition-colors"
                     >
                       <Trash2 size={14} />
                       Delete
@@ -126,7 +126,7 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
           </div>
 
           {post.is_readme ? (
-            <div className="mt-3 p-4 rounded-lg gum-border bg-secondary/10 prose-readme">
+            <div className="mt-3 p-4 rounded-[3px] gum-border bg-secondary/10 prose-readme">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkGemoji]}
                 components={{
@@ -137,7 +137,7 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
                         style={vscDarkPlus}
                         language={match[1]}
                         PreTag="div"
-                        className="rounded-md my-4"
+                        className="rounded-[3px] my-4"
                         {...props}
                       >
                         {String(children).replace(/\n$/, "")}
@@ -160,7 +160,7 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
           )}
 
           {post.media_url && (
-            <div className="mt-3 rounded-lg gum-border overflow-hidden bg-muted">
+            <div className="mt-3 rounded-[3px] gum-border overflow-hidden bg-muted">
               <img
                 src={post.media_url}
                 alt="Post content"
@@ -171,7 +171,7 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
           )}
 
           {post.code && (
-            <div className="mt-3 gum-border rounded-lg bg-muted p-4 overflow-x-auto">
+            <div className="mt-3 gum-border rounded-[3px] bg-muted p-4 overflow-x-auto">
               <pre className="text-xs font-mono text-foreground">
                 <code>{post.code}</code>
               </pre>
@@ -183,7 +183,7 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 text-xs font-mono font-medium bg-secondary px-2.5 py-1 rounded-lg gum-border gum-shadow-sm"
+                  className="inline-flex items-center gap-1 text-xs font-mono font-medium bg-secondary px-2.5 py-1 rounded-[3px] gum-border gum-shadow-sm"
                 >
                   <Hash size={10} />
                   {tag}

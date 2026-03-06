@@ -204,7 +204,7 @@ const AuthPage = () => {
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="text-xs font-bold bg-destructive/10 text-destructive px-4 py-3 rounded-xl border-2 border-destructive/20"
+                        className="text-xs font-bold bg-destructive/10 text-destructive px-4 py-3 rounded-[3px] border-2 border-destructive/20"
                       >
                         {error}
                       </motion.div>
@@ -301,12 +301,12 @@ const AuthPage = () => {
                       All sign in options
                     </button>
 
-                    <div className="flex p-1 bg-secondary rounded-xl mb-8">
+                    <div className="flex p-1 bg-secondary rounded-[3px] mb-8">
                       {["Sign In", "Sign Up"].map((tab, i) => (
                         <button
                           key={tab}
                           onClick={() => { setIsSignUp(i === 1); setError(""); setSuccess(""); }}
-                          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-300 ${(i === 0 && !isSignUp) || (i === 1 && isSignUp)
+                          className={`flex-1 py-3 text-sm font-bold rounded-[3px] transition-all duration-300 ${(i === 0 && !isSignUp) || (i === 1 && isSignUp)
                             ? "bg-background text-foreground shadow-md scale-[1.02]"
                             : "text-muted-foreground hover:text-foreground"
                             }`}
@@ -332,7 +332,7 @@ const AuthPage = () => {
                               value={username}
                               onChange={(e) => setUsername(e.target.value)}
                               placeholder="cooldev42"
-                              className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
+                              className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-[3px] text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
                               required
                             />
                           </div>
@@ -345,7 +345,7 @@ const AuthPage = () => {
                               value={displayName}
                               onChange={(e) => setDisplayName(e.target.value)}
                               placeholder="Cool Developer"
-                              className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
+                              className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-[3px] text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
                               required
                             />
                           </div>
@@ -361,7 +361,7 @@ const AuthPage = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="you@dev.com"
-                          className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
+                          className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-[3px] text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
                           required
                         />
                       </div>
@@ -376,7 +376,7 @@ const AuthPage = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 pr-12 transition-all placeholder:text-muted-foreground/30"
+                            className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-[3px] text-sm outline-none focus:ring-2 focus:ring-primary/20 pr-12 transition-all placeholder:text-muted-foreground/30"
                             required
                           />
                           <button
@@ -393,7 +393,7 @@ const AuthPage = () => {
                         <motion.div
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="text-xs font-bold bg-destructive/10 text-destructive px-4 py-3 rounded-xl border-2 border-destructive/20"
+                          className="text-xs font-bold bg-destructive/10 text-destructive px-4 py-3 rounded-[3px] border-2 border-destructive/20"
                         >
                           {error}
                         </motion.div>
@@ -403,7 +403,7 @@ const AuthPage = () => {
                         <motion.div
                           initial={{ opacity: 0, x: 10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="text-xs font-bold bg-primary/10 text-foreground px-4 py-3 rounded-xl gum-border"
+                          className="text-xs font-bold bg-primary/10 text-foreground px-4 py-3 rounded-[3px] gum-border"
                         >
                           {success}
                         </motion.div>

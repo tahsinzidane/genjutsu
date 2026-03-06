@@ -31,7 +31,7 @@ const WhispersPage = () => {
                                         navigate("/");
                                     }
                                 }}
-                                className="p-2 hover:bg-secondary rounded-lg transition-colors border-2 border-transparent hover:border-border"
+                                className="p-2 hover:bg-secondary rounded-[3px] transition-colors border-2 border-transparent hover:border-border"
                             >
                                 <ArrowLeft size={20} />
                             </button>
@@ -44,7 +44,7 @@ const WhispersPage = () => {
                             </div>
                         ) : !user ? (
                             <div className="gum-card p-12 text-center flex flex-col items-center gap-4 bg-secondary/20 border-dashed">
-                                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+                                <div className="w-16 h-16 rounded-[3px] bg-secondary flex items-center justify-center border-2 border-primary/20">
                                     <LogIn size={32} className="text-primary/50" />
                                 </div>
                                 <div className="max-w-sm">
@@ -92,7 +92,7 @@ const WhispersPage = () => {
                             </div>
                         ) : (
                             <div className="gum-card p-12 text-center flex flex-col items-center gap-4 bg-secondary/20 border-dashed">
-                                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
+                                <div className="w-16 h-16 rounded-[3px] bg-secondary flex items-center justify-center border-2 border-primary/20">
                                     <Send size={32} className="text-primary/50" />
                                 </div>
                                 <div className="max-w-sm">
@@ -111,7 +111,7 @@ const WhispersPage = () => {
                         )}
                     </div>
 
-                    <div className="hidden lg:block">
+                    <div className="hidden lg:block lg:sticky lg:top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 custom-scrollbar">
                         <Sidebar />
                     </div>
                 </div>

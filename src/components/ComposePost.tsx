@@ -211,7 +211,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
           />
 
           {isReadme && showPreview && (
-            <div className="mt-3 p-4 rounded-lg gum-border bg-secondary/10 max-h-[400px] overflow-y-auto prose-readme custom-scrollbar">
+            <div className="mt-3 p-4 rounded-[3px] gum-border bg-secondary/10 max-h-[400px] overflow-y-auto prose-readme custom-scrollbar">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkGemoji]}
                 components={{
@@ -222,7 +222,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
                         style={vscDarkPlus}
                         language={match[1]}
                         PreTag="div"
-                        className="rounded-md my-4"
+                        className="rounded-[3px] my-4"
                         {...props}
                       >
                         {String(children).replace(/\n$/, "")}
@@ -252,7 +252,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative mt-3 rounded-lg gum-border overflow-hidden max-h-[300px]"
+                className="relative mt-3 rounded-[3px] gum-border overflow-hidden max-h-[300px]"
               >
                 <img src={mediaPreview} alt="Preview" className="w-full h-full object-cover" />
                 <button
@@ -271,7 +271,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="// Paste your code here..."
-                className="w-full bg-muted text-foreground font-mono text-xs p-3 rounded-lg gum-border resize-none outline-none min-h-[120px]"
+                className="w-full bg-muted text-foreground font-mono text-xs p-3 rounded-[3px] gum-border resize-none outline-none min-h-[120px]"
                 rows={4}
               />
             </div>
@@ -288,14 +288,14 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
+                className="p-2 rounded-[3px] hover:bg-secondary text-muted-foreground transition-colors"
                 title="Upload Image"
               >
                 <ImageIcon size={16} />
               </button>
               <button
                 onClick={() => setShowCode(!showCode)}
-                className={`p-2 rounded-lg transition-colors ${showCode ? "bg-primary text-primary-foreground" : "hover:bg-secondary text-muted-foreground"
+                className={`p-2 rounded-[3px] transition-colors ${showCode ? "bg-primary text-primary-foreground" : "hover:bg-secondary text-muted-foreground"
                   }`}
                 title="Add Code"
               >
@@ -303,7 +303,7 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
               </button>
               <button
                 onClick={() => setIsReadme(!isReadme)}
-                className={`p-2 rounded-lg transition-colors ${isReadme ? "bg-primary text-primary-foreground" : "hover:bg-secondary text-muted-foreground"
+                className={`p-2 rounded-[3px] transition-colors ${isReadme ? "bg-primary text-primary-foreground" : "hover:bg-secondary text-muted-foreground"
                   }`}
                 title="Toggle README (Markdown)"
               >

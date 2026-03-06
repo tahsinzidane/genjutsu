@@ -102,7 +102,7 @@ const ChatPage = () => {
                                         navigate("/whispers");
                                     }
                                 }}
-                                className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                                className="p-2 hover:bg-secondary rounded-[3px] transition-colors"
                             >
                                 <ArrowLeft size={18} />
                             </button>
@@ -134,7 +134,7 @@ const ChatPage = () => {
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 className={`flex ${isMe ? "justify-end" : "justify-start"}`}
                             >
-                                <div className={`max-w-[85%] sm:max-w-[70%] px-4 py-2.5 text-sm border-2 rounded-xl gum-shadow-sm ${isMe
+                                <div className={`max-w-[85%] sm:max-w-[70%] px-4 py-2.5 text-sm border-2 rounded-[3px] gum-shadow-sm ${isMe
                                     ? "bg-primary text-primary-foreground border-primary"
                                     : "bg-secondary text-secondary-foreground border-border"
                                     }`}>
@@ -149,7 +149,7 @@ const ChatPage = () => {
                     })
                 ) : (
                     <div className="py-20 text-center text-xs text-muted-foreground italic flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 rounded-full border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-[3px] border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
                             <Send size={16} className="opacity-40" />
                         </div>
                         This conversation is a void. Start whispering now.

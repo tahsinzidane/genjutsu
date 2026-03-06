@@ -70,7 +70,7 @@ const Index = () => {
               <ComposePost onPost={createPost} />
             ) : (
               <div className="gum-card p-6 mb-6 text-center">
-                <div className="w-12 h-12 rounded-xl overflow-hidden gum-border mx-auto mb-3">
+                <div className="w-12 h-12 rounded-[3px] overflow-hidden gum-border mx-auto mb-3">
                   <img src="/fav.jpg" alt="genjutsu" className="w-full h-full object-cover" />
                 </div>
                 <h2 className="font-bold text-lg mb-1">Join the conversation</h2>
@@ -111,10 +111,8 @@ const Index = () => {
               </div>
             )}
           </div>
-          <div className="hidden lg:block">
-            <div className="sticky top-20">
-              <Sidebar />
-            </div>
+          <div className="hidden lg:block lg:sticky lg:top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 custom-scrollbar">
+            <Sidebar />
           </div>
         </div>
       </main>

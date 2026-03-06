@@ -154,7 +154,7 @@ const FollowsList = ({ userId, type, isOpen, onOpenChange, onAction }: FollowsLi
                                         onOpenChange(false);
                                         navigate(`/${item.username}`);
                                     }}
-                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary cursor-pointer transition-colors group"
+                                    className="flex items-center gap-3 p-3 rounded-[3px] hover:bg-secondary cursor-pointer transition-colors group"
                                 >
                                     <div className="w-10 h-10 rounded-[3px] gum-border bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
                                         {item.avatar_url ? (
@@ -174,7 +174,7 @@ const FollowsList = ({ userId, type, isOpen, onOpenChange, onAction }: FollowsLi
                                                     onOpenChange(false);
                                                     navigate(`/whisper/${item.username}`);
                                                 }}
-                                                className="p-1.5 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-all gum-border"
+                                                className="p-1.5 rounded-[3px] bg-secondary hover:bg-primary hover:text-primary-foreground transition-all gum-border"
                                                 title="Whisper"
                                             >
                                                 <Send size={14} />

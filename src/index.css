@@ -216,12 +216,12 @@
   }
 
   .gum-card {
-    @apply border-2 border-border bg-card rounded-xl;
+    @apply border-2 border-border bg-card rounded-[3px];
     box-shadow: var(--shadow-gum);
   }
 
   .gum-btn {
-    @apply border-2 border-border font-semibold rounded-xl px-5 py-2.5 transition-all duration-150 cursor-pointer;
+    @apply border-2 border-border font-semibold rounded-[3px] px-5 py-2.5 transition-all duration-150 cursor-pointer;
     box-shadow: var(--shadow-gum);
   }
 
@@ -233,6 +233,23 @@
   .gum-btn:active {
     box-shadow: var(--shadow-gum-active);
     transform: translate(4px, 4px);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
   }
 
   /* GitHub-style Markdown Rendering */
@@ -248,7 +265,7 @@
     @apply prose-a:text-primary prose-a:no-underline hover:prose-a:underline;
     @apply prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none;
     @apply prose-pre:bg-muted prose-pre:gum-border prose-pre:p-4;
-    @apply prose-img:rounded-lg prose-img:gum-border;
+    @apply prose-img:rounded-[3px] prose-img:gum-border;
     @apply prose-hr:border-border prose-hr:my-6;
   }
 }

@@ -34,13 +34,13 @@ const TermsPage = () => {
                         <p className="text-muted-foreground mt-2">The simple rules of the genjutsu world.</p>
                     </div>
 
-                    <div className="gum-card p-10 space-y-8 prose prose-invert max-w-none">
+                    <div className="gum-card p-10 space-y-8 prose dark:prose-invert max-w-none">
                         <section className="space-y-4">
                             <div className="flex items-center gap-3">
                                 <Gavel className="text-primary" size={24} />
                                 <h2 className="text-2xl font-bold m-0">1. Play Nice</h2>
                             </div>
-                            <p className="text-sm leading-relaxed text-muted-foreground mt-2">
+                            <p className="text-sm leading-relaxed text-foreground/70 mt-2">
                                 genjutsu is a place for developers to share what they are building. We don't tolerate harassment, hate speech, or spam. If you act like a bot or a bully, we'll remove your account. No warnings.
                             </p>
                         </section>
@@ -50,7 +50,7 @@ const TermsPage = () => {
                                 <ShieldAlert className="text-primary" size={24} />
                                 <h2 className="text-2xl font-bold m-0">2. Code & Content</h2>
                             </div>
-                            <p className="text-sm leading-relaxed text-muted-foreground mt-2">
+                            <p className="text-sm leading-relaxed text-foreground/70 mt-2">
                                 You own what you post. However, keep in mind everything is deleted after 24 hours. We are not responsible for lost snippets. Back them up if they're important! Don't post content that isn't yours to share.
                             </p>
                         </section>
@@ -60,7 +60,7 @@ const TermsPage = () => {
                                 <UserX className="text-primary" size={24} />
                                 <h2 className="text-2xl font-bold m-0">3. Termination</h2>
                             </div>
-                            <p className="text-sm leading-relaxed text-muted-foreground mt-2">
+                            <p className="text-sm leading-relaxed text-foreground/70 mt-2">
                                 We reserve the right to ban any account for any reason. If we think your existence on genjutsu is harming the community, you're out. Simple as that.
                             </p>
                         </section>

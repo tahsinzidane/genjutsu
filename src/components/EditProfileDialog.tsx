@@ -230,20 +230,20 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="bg-primary text-primary-foreground px-8 py-2 rounded-lg font-bold border-2 border-foreground hover:bg-primary/90 transition-all flex items-center gap-2"
+                            className="bg-primary text-primary-foreground px-4 sm:px-8 py-2 rounded-[3px] font-bold border-2 border-foreground hover:bg-primary/90 transition-all flex items-center gap-2"
                         >
                             {submitting ? <Loader2 className="animate-spin" size={16} /> : "Save"}
                         </button>
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
-                        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_400px] gap-8 p-6 lg:p-12">
+                        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_400px] gap-6 sm:gap-8 p-4 sm:p-6 lg:p-12">
                             {/* Left Column: Visual Previews */}
                             <div className="space-y-6">
                                 <Label className="font-bold text-xl block mb-4">Profile Appearance</Label>
-                                <div className="relative mb-24 bg-secondary/5 rounded-2xl border-2 border-foreground/10">
+                                <div className="bg-secondary/5 rounded-[3px] border-2 border-foreground/10">
                                     {/* Banner Preview */}
-                                    <div className="h-48 sm:h-72 w-full bg-muted relative group overflow-hidden border-b-2 border-foreground/10 rounded-t-2xl">
+                                    <div className="h-40 sm:h-72 w-full bg-muted relative group overflow-hidden border-b-2 border-foreground/10 rounded-t-[3px]">
                                         {bannerUrl ? (
                                             <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
                                         ) : (
@@ -270,47 +270,81 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                         />
                                     </div>
 
-                                    {/* Avatar Preview */}
-                                    <div className="absolute -bottom-16 left-8">
-                                        <div className="relative group w-40 h-40 rounded-2xl gum-border border-[6px] border-background bg-secondary overflow-hidden shadow-2xl">
-                                            {avatarUrl ? (
-                                                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-3xl font-bold bg-secondary">
-                                                    {displayName[0]?.toUpperCase() || "?"}
+                                    {/* Avatar Preview — inline on mobile, absolute on sm+ */}
+                                    <div className="flex sm:block">
+                                        {/* Mobile: centered inline avatar below banner */}
+                                        <div className="sm:hidden flex justify-center -mt-12 pb-4 w-full">
+                                            <div className="relative group w-24 h-24 rounded-[3px] gum-border border-[4px] border-background bg-secondary overflow-hidden shadow-2xl">
+                                                {avatarUrl ? (
+                                                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-2xl font-bold bg-secondary">
+                                                        {displayName[0]?.toUpperCase() || "?"}
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => avatarInputRef.current?.click()}
+                                                        disabled={uploadingAvatar}
+                                                        className="p-2 bg-background shadow-xl rounded-full hover:bg-secondary gum-border transition-all"
+                                                    >
+                                                        {uploadingAvatar ? <Loader2 className="animate-spin" size={18} /> : <Camera size={18} />}
+                                                    </button>
                                                 </div>
-                                            )}
-                                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => avatarInputRef.current?.click()}
-                                                    disabled={uploadingAvatar}
-                                                    className="p-3 bg-background shadow-xl rounded-full hover:bg-secondary gum-border transition-all transform scale-90 group-hover:scale-100"
-                                                >
-                                                    {uploadingAvatar ? <Loader2 className="animate-spin" size={24} /> : <Camera size={24} />}
-                                                </button>
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    ref={avatarInputRef}
+                                                    accept="image/*"
+                                                    onChange={(e) => handleFileUpload(e, 'avatars')}
+                                                />
                                             </div>
-                                            <input
-                                                type="file"
-                                                className="hidden"
-                                                ref={avatarInputRef}
-                                                accept="image/*"
-                                                onChange={(e) => handleFileUpload(e, 'avatars')}
-                                            />
+                                        </div>
+                                        {/* Desktop: absolute overlapping avatar */}
+                                        <div className="hidden sm:block relative h-20">
+                                            <div className="absolute -top-16 left-8">
+                                                <div className="relative group w-40 h-40 rounded-[3px] gum-border border-[6px] border-background bg-secondary overflow-hidden shadow-2xl">
+                                                    {avatarUrl ? (
+                                                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-3xl font-bold bg-secondary">
+                                                            {displayName[0]?.toUpperCase() || "?"}
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => avatarInputRef.current?.click()}
+                                                            disabled={uploadingAvatar}
+                                                            className="p-3 bg-background shadow-xl rounded-full hover:bg-secondary gum-border transition-all transform scale-90 group-hover:scale-100"
+                                                        >
+                                                            {uploadingAvatar ? <Loader2 className="animate-spin" size={24} /> : <Camera size={24} />}
+                                                        </button>
+                                                    </div>
+                                                    <input
+                                                        type="file"
+                                                        className="hidden"
+                                                        ref={avatarInputRef}
+                                                        accept="image/*"
+                                                        onChange={(e) => handleFileUpload(e, 'avatars')}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Right Column: Profile Info */}
-                            <div className="space-y-10 lg:sticky lg:top-0 h-fit">
+                            <div className="space-y-8 lg:sticky lg:top-0 h-fit">
                                 <div className="space-y-4">
                                     <Label htmlFor="displayName" className="font-bold text-lg block">Display Name</Label>
                                     <Input
                                         id="displayName"
                                         value={displayName}
                                         onChange={(e) => setDisplayName(e.target.value)}
-                                        className="gum-border focus-visible:ring-primary text-lg p-7 bg-background"
+                                        className="gum-border focus-visible:ring-primary text-lg p-4 sm:p-7 bg-background"
                                         placeholder="What should we call you?"
                                     />
                                 </div>
@@ -320,7 +354,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                         id="bio"
                                         value={bio}
                                         onChange={(e) => setBio(e.target.value)}
-                                        className="gum-border focus-visible:ring-primary min-h-[180px] text-lg p-5 bg-background resize-none"
+                                        className="gum-border focus-visible:ring-primary min-h-[180px] text-lg p-4 sm:p-5 bg-background resize-none"
                                         placeholder="Write something about yourself..."
                                     />
                                 </div>
@@ -330,7 +364,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                     <button
                                         type="button"
                                         onClick={() => setShowSocials(!showSocials)}
-                                        className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-all p-3 rounded-xl hover:bg-secondary/50 w-full justify-between"
+                                        className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-all p-3 rounded-[3px] hover:bg-secondary/50 w-full justify-between"
                                     >
                                         <div className="flex items-center gap-2 uppercase tracking-widest">
                                             <LinkIcon size={14} />
@@ -340,7 +374,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                     </button>
 
                                     {showSocials && (
-                                        <div className="mt-4 space-y-4 p-6 bg-secondary/5 rounded-2xl gum-border animate-in slide-in-from-top-4 duration-300">
+                                        <div className="mt-4 space-y-4 p-6 bg-secondary/5 rounded-[3px] gum-border animate-in slide-in-from-top-4 duration-300">
                                             {[
                                                 { id: 'github', label: 'GitHub', placeholder: 'github.com/username' },
                                                 { id: 'twitter', label: 'Twitter / X', placeholder: 'twitter.com/username' },
@@ -368,7 +402,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                     <button
                                         type="button"
                                         onClick={() => setShowMusic(!showMusic)}
-                                        className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-all p-3 rounded-xl hover:bg-secondary/50 w-full justify-between"
+                                        className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-all p-3 rounded-[3px] hover:bg-secondary/50 w-full justify-between"
                                     >
                                         <div className="flex items-center gap-2 uppercase tracking-widest">
                                             <Music size={14} />
@@ -378,10 +412,10 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                     </button>
 
                                     {showMusic && (
-                                        <div className="mt-4 space-y-4 p-6 bg-secondary/5 rounded-2xl gum-border animate-in slide-in-from-top-4 duration-300">
+                                        <div className="mt-4 space-y-4 p-6 bg-secondary/5 rounded-[3px] gum-border animate-in slide-in-from-top-4 duration-300">
                                             {favSong && (
-                                                <div className="flex items-center gap-4 p-4 bg-background rounded-xl gum-border mb-4">
-                                                    <img src={favSong.artworkUrl100} className="w-12 h-12 rounded-lg object-cover" alt="" />
+                                                <div className="flex items-center gap-4 p-4 bg-background rounded-[3px] gum-border mb-4">
+                                                    <img src={favSong.artworkUrl100} className="w-12 h-12 rounded-[3px] object-cover" alt="" />
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-bold text-sm truncate">{favSong.trackName}</p>
                                                         <p className="text-xs text-muted-foreground truncate">{favSong.artistName}</p>
@@ -411,7 +445,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                     type="button"
                                                     onClick={searchSongs}
                                                     disabled={searching}
-                                                    className="bg-secondary p-3 rounded-lg border-2 border-foreground hover:opacity-80 disabled:opacity-50"
+                                                    className="bg-secondary p-3 rounded-[3px] border-2 border-foreground hover:opacity-80 disabled:opacity-50"
                                                 >
                                                     {searching ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
                                                 </button>
@@ -421,18 +455,18 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                                 {searchResults.map((song) => (
                                                     <div
                                                         key={song.trackId}
-                                                        className="flex items-center gap-3 p-3 bg-background rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer group border-2 border-transparent hover:border-foreground/10"
+                                                        className="flex items-center gap-3 p-3 bg-background rounded-[3px] hover:bg-secondary/50 transition-colors cursor-pointer group border-2 border-transparent hover:border-foreground/10"
                                                         onClick={() => setFavSong(song)}
                                                     >
                                                         <div className="relative w-10 h-10 shrink-0">
-                                                            <img src={song.artworkUrl100} className="w-full h-full rounded-md object-cover" alt="" />
+                                                            <img src={song.artworkUrl100} className="w-full h-full rounded-[3px] object-cover" alt="" />
                                                             <button
                                                                 type="button"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     togglePreview(song.previewUrl);
                                                                 }}
-                                                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity rounded-md"
+                                                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity rounded-[3px]"
                                                             >
                                                                 {playingPreview === song.previewUrl ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
                                                             </button>
@@ -456,7 +490,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                     <button
                                         type="button"
                                         onClick={() => setShowUrls(!showUrls)}
-                                        className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-all p-3 rounded-xl hover:bg-secondary/50 w-full justify-between"
+                                        className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-all p-3 rounded-[3px] hover:bg-secondary/50 w-full justify-between"
                                     >
                                         <div className="flex items-center gap-2">
                                             <LinkIcon size={14} />
@@ -466,7 +500,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
                                     </button>
 
                                     {showUrls && (
-                                        <div className="mt-4 space-y-6 p-6 bg-secondary/5 rounded-2xl gum-border animate-in slide-in-from-top-4 duration-300">
+                                        <div className="mt-4 space-y-6 p-6 bg-secondary/5 rounded-[3px] gum-border animate-in slide-in-from-top-4 duration-300">
                                             <div className="space-y-3">
                                                 <Label htmlFor="avatarUrl" className="text-xs font-bold uppercase tracking-wider opacity-60">Custom Avatar URL</Label>
                                                 <Input

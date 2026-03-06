@@ -447,10 +447,8 @@ const PostPage = () => {
                             </div>
                         )}
                     </div>
-                    <div className="hidden lg:block">
-                        <div className="sticky top-20">
-                            <Sidebar />
-                        </div>
+                    <div className="hidden lg:block lg:sticky lg:top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 custom-scrollbar">
+                        <Sidebar />
                     </div>
                 </div>
             </main>

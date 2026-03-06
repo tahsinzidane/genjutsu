@@ -246,7 +246,7 @@ const Sidebar = ({ onAction }: SidebarProps) => {
         transition={{ delay: 0.3 }}
         className="text-xs text-muted-foreground space-y-1 px-1"
       >
-        <p>© 2026 genjutsu · Created by <a href="https://iamovi.github.io/" target="_blank" rel="noopener noreferrer" className="hover:underline text-primary/80 font-bold">Ovi</a></p>
+        <p>© 2026 genjutsu</p>
         <div className="flex gap-3">
           <Link to="/about" onClick={() => onAction?.()} className="hover:underline">About</Link>
           <Link to="/terms" onClick={() => onAction?.()} className="hover:underline">Terms</Link>

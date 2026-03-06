@@ -188,7 +188,7 @@ const SearchPage = () => {
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => navigate(-1)}
-                                className="p-2 hover:bg-secondary rounded-lg transition-colors border-2 border-transparent hover:border-border"
+                                className="p-2 hover:bg-secondary rounded-[3px] transition-colors border-2 border-transparent hover:border-border"
                             >
                                 <ArrowLeft size={20} />
                             </button>
@@ -277,7 +277,7 @@ const SearchPage = () => {
                                                                 e.stopPropagation();
                                                                 navigate(`/whisper/${profile.username}`);
                                                             }}
-                                                            className="p-2 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-all gum-border shrink-0"
+                                                            className="p-2 rounded-[3px] bg-secondary hover:bg-primary hover:text-primary-foreground transition-all gum-border shrink-0"
                                                             title="Whisper"
                                                         >
                                                             <Send size={16} />
@@ -295,7 +295,7 @@ const SearchPage = () => {
                             </div>
                         ) : (
                             <div className="gum-card p-12 text-center flex flex-col items-center gap-4 bg-secondary/20 border-dashed">
-                                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
+                                <div className="w-16 h-16 rounded-[3px] bg-secondary flex items-center justify-center">
                                     <SearchIcon size={32} className="text-muted-foreground" />
                                 </div>
                                 <div>
@@ -308,7 +308,7 @@ const SearchPage = () => {
                         )}
                     </div>
 
-                    <div className="hidden lg:block">
+                    <div className="hidden lg:block lg:sticky lg:top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 custom-scrollbar">
                         <Sidebar />
                     </div>
                 </div>
