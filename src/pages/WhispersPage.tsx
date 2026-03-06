@@ -69,7 +69,8 @@ const WhispersPage = () => {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         onClick={() => navigate(`/whisper/${conv.username}`)}
-                                        className="gum-card p-4 flex items-center gap-4 cursor-pointer hover:bg-secondary/50 transition-all group"
+                                        className={`gum-card p-4 flex items-center gap-4 cursor-pointer hover:bg-secondary/50 transition-all group ${conv.has_unread ? "border-primary/40 bg-primary/5" : ""
+                                            }`}
                                     >
                                         <div className="w-12 h-12 rounded-[3px] gum-border bg-secondary flex items-center justify-center font-bold text-lg shrink-0 overflow-hidden">
                                             {conv.avatar_url ? (
@@ -78,15 +79,20 @@ const WhispersPage = () => {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between mb-1">
-                                                <h4 className="font-bold group-hover:underline truncate">{conv.display_name}</h4>
+                                                <h4 className={`group-hover:underline truncate ${conv.has_unread ? "font-extrabold" : "font-bold"
+                                                    }`}>{conv.display_name}</h4>
                                                 <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                                                     {new Date(conv.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-muted-foreground truncate italic">
+                                            <p className={`text-xs truncate italic ${conv.has_unread ? "text-foreground font-semibold" : "text-muted-foreground"
+                                                }`}>
                                                 "{conv.last_message.substring(0, 60)}"
                                             </p>
                                         </div>
+                                        {conv.has_unread && (
+                                            <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0 animate-pulse" />
+                                        )}
                                     </motion.div>
                                 ))}
                             </div>

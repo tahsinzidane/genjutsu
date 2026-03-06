@@ -8,6 +8,7 @@ import { useState, useRef, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import NotificationPanel from "./NotificationPanel";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useUnreadWhispers } from "@/hooks/useUnreadWhispers";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +26,7 @@ const Navbar = () => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const notifRef = useRef<HTMLDivElement>(null);
+  const { hasUnread: hasUnreadWhispers } = useUnreadWhispers();
 
   // Close notification panel on outside click
   useEffect(() => {
@@ -70,13 +72,16 @@ const Navbar = () => {
               <button
                 key={label}
                 onClick={() => navigate(path)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-[3px] text-sm font-medium transition-all ${location.pathname === path
+                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-[3px] text-sm font-medium transition-all ${location.pathname === path
                   ? "bg-primary text-primary-foreground gum-shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   }`}
               >
                 <Icon size={16} />
                 {label}
+                {label === "Whispers" && hasUnreadWhispers && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-background animate-pulse" />
+                )}
               </button>
             ))}
           </nav>
@@ -108,10 +113,13 @@ const Navbar = () => {
             </button>
             <button
               onClick={() => navigate("/whispers")}
-              className="md:hidden p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary text-muted-foreground transition-colors gum-border"
+              className="md:hidden relative p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary text-muted-foreground transition-colors gum-border"
               title="Whispers"
             >
               <Send size={16} />
+              {hasUnreadWhispers && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-background animate-pulse" />
+              )}
             </button>
             <button
               onClick={() => setIsDrawerOpen(true)}

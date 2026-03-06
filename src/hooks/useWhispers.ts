@@ -25,6 +25,7 @@ export interface Conversation {
     avatar_url: string | null;
     last_message: string;
     last_message_at: string;
+    has_unread: boolean;
 }
 
 export function useWhispers(targetUserId?: string) {
@@ -39,7 +40,7 @@ export function useWhispers(targetUserId?: string) {
             if (!user) return [];
 
             const { data, error } = await sb.from("messages")
-                .select("sender_id, receiver_id, content, created_at")
+                .select("sender_id, receiver_id, content, created_at, is_read")
                 .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
                 .gt("created_at", new Date(getNow().getTime() - 24 * 60 * 60 * 1000).toISOString())
                 .order("created_at", { ascending: false });
@@ -50,6 +51,7 @@ export function useWhispers(targetUserId?: string) {
             // Group by user and find last message
             const groups: Record<string, any> = {};
             const otherUserIds: string[] = [];
+            const unreadByUser: Record<string, boolean> = {};
 
             (data as any[]).forEach((msg: any) => {
                 const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
@@ -59,6 +61,10 @@ export function useWhispers(targetUserId?: string) {
                         last_message_at: msg.created_at,
                     };
                     otherUserIds.push(otherId);
+                }
+                // Track unread: if I'm the receiver and is_read is false
+                if (msg.receiver_id === user.id && !msg.is_read) {
+                    unreadByUser[otherId] = true;
                 }
             });
 
@@ -71,7 +77,8 @@ export function useWhispers(targetUserId?: string) {
 
             return (profiles || []).map(p => ({
                 ...p,
-                ...groups[p.user_id]
+                ...groups[p.user_id],
+                has_unread: !!unreadByUser[p.user_id],
             })).sort((a, b) =>
                 new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
             ) as Conversation[];
@@ -97,6 +104,29 @@ export function useWhispers(targetUserId?: string) {
         enabled: !!user && !!targetUserId,
     });
 
+    // Mark conversation as read
+    const markRead = async (fromId: string) => {
+        if (!user) return;
+        const { error } = await sb
+            .from("messages")
+            .update({ is_read: true })
+            .eq("sender_id", fromId)
+            .eq("receiver_id", user.id)
+            .eq("is_read", false);
+
+        if (!error) {
+            queryClient.invalidateQueries({ queryKey: ["whisper-unread", user.id] });
+            queryClient.invalidateQueries({ queryKey: ["conversations", user.id] });
+        }
+    };
+
+    // Mark as read when opening a chat
+    useEffect(() => {
+        if (targetUserId) {
+            markRead(targetUserId);
+        }
+    }, [user?.id, targetUserId]);
+
     // Send message
     const sendMessageMutation = useMutation({
         mutationFn: async (content: string) => {
@@ -117,7 +147,7 @@ export function useWhispers(targetUserId?: string) {
         }
     });
 
-    // Realtime subscription
+    // Realtime subscription — listen for both incoming and outgoing messages
     useEffect(() => {
         if (!user) return;
 
@@ -138,10 +168,33 @@ export function useWhispers(targetUserId?: string) {
                         table: "messages",
                         filter: `receiver_id=eq.${user.id}`,
                     },
-                    () => {
-                        queryClient.invalidateQueries({ queryKey: ["conversations", user?.id] });
+                    (payload: any) => {
+                        // Always refresh conversations list
+                        queryClient.invalidateQueries({ queryKey: ["conversations", user.id] });
+
+                        // If viewing a specific chat
                         if (targetUserId) {
-                            queryClient.invalidateQueries({ queryKey: ["whispers", user?.id, targetUserId] });
+                            // If message is from the person we are talking to, mark it read instantly
+                            if (payload.new.sender_id === targetUserId) {
+                                markRead(targetUserId);
+                                queryClient.invalidateQueries({ queryKey: ["whispers", user.id, targetUserId] });
+                            }
+                        }
+                    }
+                )
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "INSERT",
+                        schema: "public",
+                        table: "messages",
+                        filter: `sender_id=eq.${user.id}`,
+                    },
+                    () => {
+                        // Refresh conversations and current chat when WE send a message
+                        queryClient.invalidateQueries({ queryKey: ["conversations", user.id] });
+                        if (targetUserId) {
+                            queryClient.invalidateQueries({ queryKey: ["whispers", user.id, targetUserId] });
                         }
                     }
                 )

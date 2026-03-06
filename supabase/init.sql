@@ -34,7 +34,8 @@ CREATE TABLE public.profiles (
   social_links JSONB DEFAULT '{}'::jsonb,
   fav_song JSONB DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  whisper_last_seen_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Posts
@@ -93,6 +94,7 @@ CREATE TABLE public.messages (
   sender_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   receiver_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   content TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
@@ -199,6 +201,8 @@ CREATE POLICY "Users can view their own messages"
   ON public.messages FOR SELECT USING ((select auth.uid()) = sender_id OR (select auth.uid()) = receiver_id);
 CREATE POLICY "Users can send messages"
   ON public.messages FOR INSERT WITH CHECK ((select auth.uid()) = sender_id);
+CREATE POLICY "Receivers can mark messages as read"
+  ON public.messages FOR UPDATE USING ((select auth.uid()) = receiver_id);
 
 -- Notifications
 CREATE POLICY "Users can view own notifications"

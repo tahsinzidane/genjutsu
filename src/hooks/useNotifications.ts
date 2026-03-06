@@ -124,7 +124,7 @@ export function useNotifications() {
             if (cancelled) return;
 
             channel = sb
-                .channel(`notifications-rt-${user.id}`)
+                .channel(`notifications-rt-${user.id}-${Date.now()}`)
                 .on(
                     "postgres_changes",
                     {
