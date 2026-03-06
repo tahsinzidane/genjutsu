@@ -112,9 +112,9 @@ const ChatPage = () => {
                                         <img src={targetProfile.avatar_url} alt={targetProfile.username} className="w-full h-full object-cover" />
                                     ) : targetProfile.display_name[0].toUpperCase()}
                                 </div>
-                                <div>
-                                    <h3 className="font-bold text-sm -mb-0.5">{targetProfile.display_name}</h3>
-                                    <span className="text-[10px] text-muted-foreground">@{targetProfile.username}</span>
+                                <div className="min-w-0">
+                                    <h3 className="font-bold text-sm -mb-0.5 truncate">{targetProfile.display_name}</h3>
+                                    <p className="text-[10px] text-muted-foreground truncate">@{targetProfile.username}</p>
                                 </div>
                             </div>
                         </div>

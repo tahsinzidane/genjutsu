@@ -389,7 +389,7 @@ const ProfilePage = () => {
                                                             <img
                                                                 src={profile.avatar_url}
                                                                 alt={profile.username}
-                                                                className="max-w-full max-h-[80vh] rounded-[px] gum-border gum-shadow object-contain"
+                                                                className="max-w-full max-h-[80vh] rounded-[3px] gum-border gum-shadow object-contain"
                                                             />
                                                         ) : (
                                                             <div className="w-48 h-48 rounded-[3px] gum-border bg-secondary flex items-center justify-center text-6xl font-bold gum-shadow">
@@ -439,11 +439,11 @@ const ProfilePage = () => {
                                             )}
                                         </div>
 
-                                        <div className="mt-8">
-                                            <h1 className="text-2xl font-bold tracking-tight">
+                                        <div className="mt-8 min-w-0 max-w-full overflow-hidden">
+                                            <h1 className="text-2xl font-bold tracking-tight truncate">
                                                 {profile.display_name}
                                             </h1>
-                                            <p className="text-muted-foreground">@{profile.username}</p>
+                                            <p className="text-muted-foreground truncate">@{profile.username}</p>
                                         </div>
 
                                         <p className="mt-4 text-sm leading-relaxed max-w-xl whitespace-pre-wrap">

@@ -93,15 +93,19 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(`/${post.profiles?.username}`)}
-              className="flex items-center gap-2 group text-left"
-            >
-              <span className="font-bold text-sm group-hover:underline">{post.profiles?.display_name || "Unknown"}</span>
-              <span className="text-muted-foreground text-sm">@{post.profiles?.username || "?"}</span>
-              <span className="text-muted-foreground text-xs">· {timeAgo(post.created_at)}</span>
-              <span className="text-primary/70 text-[10px] font-bold ml-2">[{getTimeRemaining(post.created_at)}]</span>
-            </button>
+            <div className="flex flex-col sm:flex-row sm:items-center min-w-0 overflow-hidden">
+              <button
+                onClick={() => navigate(`/${post.profiles?.username}`)}
+                className="flex items-center gap-1 group text-left min-w-0 overflow-hidden"
+              >
+                <span className="font-bold text-sm group-hover:underline truncate shrink-0 max-w-[140px] xs:max-w-[180px] sm:max-w-[220px]">{post.profiles?.display_name || "Unknown"}</span>
+                <span className="text-muted-foreground text-sm truncate shrink ml-1">@{post.profiles?.username || "?"}</span>
+                <span className="text-muted-foreground text-xs shrink-0 whitespace-nowrap ml-1">· {timeAgo(post.created_at)}</span>
+              </button>
+              <span className="text-primary/70 text-[9px] font-bold shrink-0 whitespace-nowrap sm:ml-2 mt-0.5 sm:mt-0">
+                [{getTimeRemaining(post.created_at)}]
+              </span>
+            </div>
             {isOwner && (
               <div className="relative" ref={menuRef}>
                 <button

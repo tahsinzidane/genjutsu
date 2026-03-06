@@ -174,7 +174,7 @@ const Sidebar = ({ onAction }: SidebarProps) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     key={dev.user_id}
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-3 min-w-0"
                   >
                     <button
                       onClick={() => { navigate(`/${dev.username}`); onAction?.(); }}
