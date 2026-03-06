@@ -56,7 +56,7 @@ const AuthPage = () => {
             setError(error.message || "Sign up failed");
           }
         } else {
-          setSuccess("Check your email to confirm your account, then sign in!");
+          setSuccess("Check your email to confirm your account, then sign in! If it doesn't arrive within a few minutes, try signing up with Google or GitHub instead.");
         }
       } else {
         const parsed = signInSchema.parse({ email, password });
