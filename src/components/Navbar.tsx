@@ -153,7 +153,7 @@ const Navbar = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.96 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 z-[80] gum-card bg-background shadow-xl overflow-hidden"
+                      className="fixed left-4 right-4 sm:absolute sm:left-auto sm:right-0 sm:w-[360px] top-[60px] sm:top-full sm:mt-2 z-[80] gum-card bg-background shadow-xl overflow-hidden"
                     >
                       <NotificationPanel
                         notifications={notifications}
