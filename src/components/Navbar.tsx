@@ -168,6 +168,17 @@ const Navbar = () => {
               </div>
             )}
 
+            {/* Settings Button */}
+            {user && (
+              <button
+                onClick={() => navigate("/settings")}
+                className={`hidden md:flex p-1.5 sm:p-2 rounded-[3px] hover:bg-secondary transition-colors gum-border ${location.pathname === "/settings" ? "bg-secondary text-foreground" : "text-muted-foreground"}`}
+                title="Settings"
+              >
+                <Settings size={16} />
+              </button>
+            )}
+
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -198,20 +209,19 @@ const Navbar = () => {
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
                   <div className="sm:hidden">
                     <DropdownMenuItem onClick={(e) => e.preventDefault()} className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <Settings className="mr-2 h-4 w-4" />
+                        <Hash className="mr-2 h-4 w-4" />
                         <span>Theme</span>
                       </div>
                       <ModeToggle />
                     </DropdownMenuItem>
                   </div>
-                  <DropdownMenuSeparator className="bg-border" />
-                  <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive focus:text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Logout</span>
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (

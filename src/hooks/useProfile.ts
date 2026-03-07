@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -45,5 +45,60 @@ export function useProfile() {
     return { error };
   };
 
-  return { profile: profile ?? null, loading, updateProfile };
+  // Cooldown status from server (single source of truth)
+  const { data: cooldownStatus } = useQuery({
+    queryKey: ["username-cooldown", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.rpc("get_username_cooldown" as any);
+      return data as { on_cooldown: boolean; available_at?: string } | null;
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const getNextUsernameChangeDate = (): Date | null => {
+    if (!cooldownStatus?.on_cooldown || !cooldownStatus?.available_at) return null;
+    return new Date(cooldownStatus.available_at);
+  };
+
+  const changeUsername = async (newUsername: string): Promise<{ error: string | null }> => {
+    if (!user) return { error: "Not authenticated" };
+
+    // Client-side validation for instant feedback
+    const normalized = newUsername.trim().toLowerCase();
+
+    if (normalized.length < 3 || normalized.length > 20) {
+      return { error: "Username must be 3–20 characters" };
+    }
+    if (!/^[a-z0-9_]+$/.test(normalized)) {
+      return { error: "Only lowercase letters, numbers, and underscores allowed" };
+    }
+    if (profile?.username === normalized) {
+      return { error: "That's already your username" };
+    }
+
+    // Server-side RPC (enforces cooldown, uniqueness, and validation)
+    const { data, error } = await supabase.rpc("change_username" as any, {
+      p_new_username: normalized,
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    const result = data as any;
+    if (result?.error) {
+      return { error: result.message || result.error };
+    }
+
+    // Update caches on success
+    queryClient.setQueryData(["profile", user.id], (old: Profile | null) =>
+      old ? { ...old, username: normalized } : old
+    );
+    queryClient.invalidateQueries({ queryKey: ["username-cooldown", user.id] });
+
+    return { error: null };
+  };
+
+  return { profile: profile ?? null, loading, updateProfile, changeUsername, getNextUsernameChangeDate };
 }

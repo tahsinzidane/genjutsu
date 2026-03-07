@@ -23,6 +23,7 @@ const WhispersPage = lazy(() => import("@/pages/WhispersPage"));
 const ChatPage = lazy(() => import("@/pages/ChatPage"));
 const PlayPage = lazy(() => import("@/pages/PlayPage"));
 const AdminPage = lazy(() => import("@/pages/AdminPage"));
+const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -76,6 +77,7 @@ const App = () => {
                       )}
                     />
                     <Route path="/:username" element={<ProfilePage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
