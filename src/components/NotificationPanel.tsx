@@ -1,4 +1,4 @@
-import { Heart, MessageSquare, UserPlus, Check, Bell } from "lucide-react";
+import { Heart, MessageSquare, UserPlus, Check, Bell, AtSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { NotificationWithActor } from "@/hooks/useNotifications";
@@ -20,6 +20,8 @@ function getNotificationIcon(type: string) {
             return <MessageSquare size={14} className="text-blue-500" />;
         case "follow":
             return <UserPlus size={14} className="text-green-500" />;
+        case "mention":
+            return <AtSign size={14} className="text-purple-500" />;
         default:
             return <Bell size={14} />;
     }
@@ -33,6 +35,8 @@ function getNotificationText(type: string, actorName: string) {
             return <><strong>{actorName}</strong> echoed on your post</>;
         case "follow":
             return <><strong>{actorName}</strong> started following you</>;
+        case "mention":
+            return <><strong>{actorName}</strong> mentioned you in a void</>;
         default:
             return <><strong>{actorName}</strong> interacted with you</>;
     }

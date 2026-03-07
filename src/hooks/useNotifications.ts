@@ -7,7 +7,7 @@ export interface NotificationWithActor {
     id: string;
     user_id: string;
     actor_id: string;
-    type: "like" | "comment" | "follow";
+    type: "like" | "comment" | "follow" | "mention";
     post_id: string | null;
     comment_id: string | null;
     is_read: boolean;
@@ -128,7 +128,7 @@ export function useNotifications() {
                 .on(
                     "postgres_changes",
                     {
-                        event: "INSERT",
+                        event: "*",
                         schema: "public",
                         table: "notifications",
                         filter: `user_id=eq.${user.id}`,

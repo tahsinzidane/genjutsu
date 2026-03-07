@@ -144,7 +144,7 @@ CREATE TABLE public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   actor_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  type TEXT NOT NULL CHECK (type IN ('like', 'comment', 'follow')),
+  type TEXT NOT NULL CHECK (type IN ('like', 'comment', 'follow', 'mention')),
   post_id UUID REFERENCES public.posts(id) ON DELETE CASCADE,
   comment_id UUID REFERENCES public.comments(id) ON DELETE CASCADE,
   is_read BOOLEAN DEFAULT false,
@@ -877,6 +877,71 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 CREATE TRIGGER on_follow_notify
   AFTER INSERT ON public.follows
   FOR EACH ROW EXECUTE FUNCTION public.notify_on_follow();
+
+
+-- Mention handling: Extract mentions (@username) and notify users
+CREATE OR REPLACE FUNCTION public.handle_mentions(
+  p_content TEXT,
+  p_actor_id UUID,
+  p_post_id UUID,
+  p_comment_id UUID DEFAULT NULL
+)
+RETURNS VOID AS $$
+DECLARE
+  v_mention RECORD;
+  v_target_user_id UUID;
+BEGIN
+  FOR v_mention IN 
+    SELECT DISTINCT (regexp_matches(p_content, '(^|[^a-z0-9_])@([a-z0-9_]{3,30})(?![a-z0-9_])', 'gi'))[2] as username
+  LOOP
+    SELECT user_id INTO v_target_user_id FROM public.profiles WHERE LOWER(username) = LOWER(v_mention.username);
+
+    IF v_target_user_id IS NOT NULL AND v_target_user_id <> p_actor_id THEN
+      IF NOT EXISTS (
+        SELECT 1 FROM public.notifications 
+        WHERE user_id = v_target_user_id 
+          AND actor_id = p_actor_id 
+          AND type = 'mention' 
+          AND post_id = p_post_id 
+          AND (p_comment_id IS NULL OR comment_id = p_comment_id)
+      ) THEN
+        INSERT INTO public.notifications (user_id, actor_id, type, post_id, comment_id)
+        VALUES (v_target_user_id, p_actor_id, 'mention', p_post_id, p_comment_id);
+      END IF;
+    END IF;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Trigger: Notification on post mention
+CREATE OR REPLACE FUNCTION public.notify_on_post_mention()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.content IS NOT NULL AND NEW.content <> '' THEN
+    PERFORM public.handle_mentions(NEW.content, NEW.user_id, NEW.id);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+CREATE TRIGGER on_post_mention_notify
+  AFTER INSERT OR UPDATE OF content ON public.posts
+  FOR EACH ROW EXECUTE FUNCTION public.notify_on_post_mention();
+
+-- Trigger: Notification on comment mention
+CREATE OR REPLACE FUNCTION public.notify_on_comment_mention()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.content IS NOT NULL AND NEW.content <> '' THEN
+    PERFORM public.handle_mentions(NEW.content, NEW.user_id, NEW.post_id, NEW.id);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+CREATE TRIGGER on_comment_mention_notify
+  AFTER INSERT OR UPDATE OF content ON public.comments
+  FOR EACH ROW EXECUTE FUNCTION public.notify_on_comment_mention();
 
 
 -- =============================================================================

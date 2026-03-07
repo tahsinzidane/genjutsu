@@ -50,7 +50,8 @@ const ChatPage = () => {
         fetchProfile();
     }, [username, navigate]);
 
-    const { messages, loadingMessages, sendMessage, isSending } = useWhispers(targetProfile?.user_id);
+    const { messages, loadingMessages, sendMessage, isSending, setTyping, isOtherUserTyping } = useWhispers(targetProfile?.user_id);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -58,11 +59,31 @@ const ChatPage = () => {
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, isOtherUserTyping]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setMessageText(value);
+
+        if (!targetProfile || !user) return;
+
+        // Broadcast typing=true
+        setTyping(true);
+
+        // Debounce typing=false
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => {
+            setTyping(false);
+        }, 2000);
+    };
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!messageText.trim() || isSending || !targetProfile) return;
+
+        // Immediately stop typing indicator on send
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        setTyping(false);
 
         try {
             await sendMessage(messageText.trim());
@@ -155,6 +176,29 @@ const ChatPage = () => {
                         This conversation is a void. Start whispering now.
                     </div>
                 )}
+
+                <AnimatePresence>
+                    {isOtherUserTyping && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 5 }}
+                            className="flex justify-start mb-2"
+                        >
+                            <div className="bg-secondary/30 border-2 border-border/50 rounded-[3px] px-3 py-1.5 flex items-center gap-2">
+                                <div className="flex gap-1">
+                                    <span className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                    <span className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                    <span className="w-1 h-1 bg-primary rounded-full animate-bounce" />
+                                </div>
+                                <span className="text-[10px] font-bold text-muted-foreground italic capitalize">
+                                    {targetProfile.display_name} is whispering...
+                                </span>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <div ref={messagesEndRef} className="h-4" />
             </main>
 
@@ -163,7 +207,7 @@ const ChatPage = () => {
                     <input
                         type="text"
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
+                        onChange={handleInputChange}
                         placeholder="Type a whisper... they vanish in 24h"
                         className="flex-1 bg-secondary/50 gum-border py-2.5 px-4 outline-none focus:border-primary transition-colors text-sm"
                         autoFocus

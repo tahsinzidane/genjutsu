@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { getNow } from "@/lib/utils";
 
 export interface Whisper {
@@ -32,6 +32,8 @@ export function useWhispers(targetUserId?: string) {
     const { user } = useAuth();
     const queryClient = useQueryClient();
     const sb = supabase as any;
+    const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+    const channelRef = useRef<any>(null);
 
     // Fetch all conversations (list of people)
     const { data: conversations, isLoading: loadingConversations } = useQuery({
@@ -152,19 +154,36 @@ export function useWhispers(targetUserId?: string) {
         }
     });
 
-    // Realtime subscription — listen for both incoming and outgoing messages
+    // Broadcast typing status
+    const setTyping = useCallback((typing: boolean) => {
+        if (channelRef.current && targetUserId && user) {
+            channelRef.current.send({
+                type: 'broadcast',
+                event: 'typing',
+                payload: { userId: user.id, typing, targetId: targetUserId },
+            });
+        }
+    }, [targetUserId, user]);
+
+    // Realtime subscription — listen for messages AND typing events
     useEffect(() => {
         if (!user) return;
 
-        let channel: any = null;
         let cancelled = false;
+        let typingTimeout: NodeJS.Timeout;
 
         // Small delay to avoid StrictMode double-mount WebSocket churn
         const timer = setTimeout(() => {
             if (cancelled) return;
 
-            channel = sb
-                .channel(`whispers-rt-${user.id}-${getNow().getTime()}`)
+            const channelId = targetUserId 
+                ? `whispers-rt-${[user.id, targetUserId].sort().join('-')}`
+                : `whispers-global-rt-${user.id}`;
+
+            const channel = sb.channel(channelId);
+            channelRef.current = channel;
+
+            channel
                 .on(
                     "postgres_changes",
                     {
@@ -174,16 +193,12 @@ export function useWhispers(targetUserId?: string) {
                         filter: `receiver_id=eq.${user.id}`,
                     },
                     (payload: any) => {
-                        // Always refresh conversations list
                         queryClient.invalidateQueries({ queryKey: ["conversations", user.id] });
-
-                        // If viewing a specific chat
-                        if (targetUserId) {
-                            // If message is from the person we are talking to, mark it read instantly
-                            if (payload.new.sender_id === targetUserId) {
-                                markRead(targetUserId);
-                                queryClient.invalidateQueries({ queryKey: ["whispers", user.id, targetUserId] });
-                            }
+                        if (targetUserId && payload.new.sender_id === targetUserId) {
+                            markRead(targetUserId);
+                            queryClient.invalidateQueries({ queryKey: ["whispers", user.id, targetUserId] });
+                            // When we get a message, they've definitely stopped typing
+                            setIsOtherUserTyping(false);
                         }
                     }
                 )
@@ -196,22 +211,35 @@ export function useWhispers(targetUserId?: string) {
                         filter: `sender_id=eq.${user.id}`,
                     },
                     () => {
-                        // Refresh conversations and current chat when WE send a message
                         queryClient.invalidateQueries({ queryKey: ["conversations", user.id] });
                         if (targetUserId) {
                             queryClient.invalidateQueries({ queryKey: ["whispers", user.id, targetUserId] });
                         }
                     }
                 )
+                .on("broadcast", { event: "typing" }, (payload: any) => {
+                    if (targetUserId && payload.payload.userId === targetUserId && payload.payload.targetId === user.id) {
+                        setIsOtherUserTyping(payload.payload.typing);
+                        
+                        // Safety timeout: if they stop sending typing events, hide it after 5 seconds
+                        if (payload.payload.typing) {
+                            clearTimeout(typingTimeout);
+                            typingTimeout = setTimeout(() => setIsOtherUserTyping(false), 5000);
+                        }
+                    }
+                })
                 .subscribe();
         }, 100);
 
         return () => {
             cancelled = true;
             clearTimeout(timer);
-            if (channel) {
-                channel.unsubscribe();
-                sb.removeChannel(channel).catch(() => { });
+            if (typingTimeout) clearTimeout(typingTimeout);
+            if (channelRef.current) {
+                const chan = channelRef.current;
+                channelRef.current = null;
+                chan.unsubscribe();
+                sb.removeChannel(chan).catch(() => { });
             }
         };
     }, [user?.id, targetUserId, queryClient]);
@@ -229,5 +257,7 @@ export function useWhispers(targetUserId?: string) {
             return sendMessageMutation.mutateAsync(content);
         },
         isSending: sendMessageMutation.isPending,
+        setTyping,
+        isOtherUserTyping,
     };
 }
