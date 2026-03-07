@@ -206,6 +206,8 @@ const ChatPage = () => {
                 <form onSubmit={handleSend} className="max-w-4xl mx-auto flex gap-3">
                     <input
                         type="text"
+                        id="whisper-input"
+                        name="whisper"
                         value={messageText}
                         onChange={handleInputChange}
                         placeholder="Type a whisper... they vanish in 24h"

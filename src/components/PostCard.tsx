@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { Hash, Heart, MessageSquare, Share, Bookmark, MoreHorizontal, Trash2, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { PostWithProfile } from "@/hooks/usePosts";
@@ -57,7 +57,7 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(days / 30)}mo`;
 }
 
-const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
+const PostCard = memo(({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
   const { user } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
@@ -273,6 +273,6 @@ const PostCard = ({ post, onLike, onBookmark, onDelete }: PostCardProps) => {
       </div>
     </motion.article>
   );
-};
+});
 
 export default PostCard;

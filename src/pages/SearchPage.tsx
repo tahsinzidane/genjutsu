@@ -196,6 +196,8 @@ const SearchPage = () => {
                                 <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                                 <input
                                     type="text"
+                                    id="search-input"
+                                    name="search"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Search users, echoes, or #hashtags..."

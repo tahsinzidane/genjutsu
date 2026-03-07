@@ -38,6 +38,13 @@ const SettingsPage = () => {
         }
     }, [profile?.username]);
 
+    // Handle session expiration or manual logout
+    useEffect(() => {
+        if (!user) {
+            navigate("/auth");
+        }
+    }, [user, navigate]);
+
     const validateUsername = (value: string): string | null => {
         const normalized = value.trim().toLowerCase();
         if (!normalized) return "Username is required";
@@ -99,7 +106,6 @@ const SettingsPage = () => {
     };
 
     if (!user) {
-        navigate("/auth");
         return null;
     }
 
@@ -209,6 +215,9 @@ const SettingsPage = () => {
                                                             onChange={(e) => handleUsernameChange(e.target.value)}
                                                             maxLength={20}
                                                             disabled={isOnCooldown}
+                                                            id="new-username"
+                                                            name="username"
+                                                            autoComplete="username"
                                                             className={`w-full pl-9 pr-4 py-2.5 bg-background border-2 rounded-[3px] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${usernameError
                                                                 ? "border-destructive"
                                                                 : isUsernameChanged && !usernameError
@@ -296,19 +305,23 @@ const SettingsPage = () => {
                                                                 <Shield size={20} />
                                                                 Are you absolutely sure?
                                                             </AlertDialogTitle>
-                                                            <AlertDialogDescription className="space-y-3">
-                                                                <p>
-                                                                    This illusion is final. Everything linked to <span className="font-mono font-bold text-foreground">@{profile?.username}</span> will vanish from the genjutsu.
-                                                                </p>
-                                                                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-[3px]">
-                                                                    <p className="text-xs font-bold text-destructive uppercase tracking-widest mb-1">To confirm, type your username:</p>
-                                                                    <input
-                                                                        type="text"
-                                                                        autoFocus
-                                                                        placeholder={profile?.username}
-                                                                        className="w-full bg-background border-2 border-destructive/30 rounded-[3px] px-3 py-2 text-sm font-mono focus:outline-none focus:border-destructive transition-colors"
-                                                                        onChange={(e) => setDeleteConfirmation(e.target.value)}
-                                                                    />
+                                                            <AlertDialogDescription asChild className="space-y-3">
+                                                                <div>
+                                                                    <p>
+                                                                        This illusion is final. Everything linked to <span className="font-mono font-bold text-foreground">@{profile?.username}</span> will vanish from the genjutsu.
+                                                                    </p>
+                                                                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-[3px]">
+                                                                        <p className="text-xs font-bold text-destructive uppercase tracking-widest mb-1">To confirm, type your username:</p>
+                                                                        <input
+                                                                            id="delete-confirm"
+                                                                            name="delete-confirm"
+                                                                            type="text"
+                                                                            autoFocus
+                                                                            placeholder={profile?.username}
+                                                                            className="w-full bg-background border-2 border-destructive/30 rounded-[3px] px-3 py-2 text-sm font-mono focus:outline-none focus:border-destructive transition-colors"
+                                                                            onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                                                        />
+                                                                    </div>
                                                                 </div>
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>

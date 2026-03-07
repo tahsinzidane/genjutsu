@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useCallback } from "react";
 import { usePostActions } from "./usePostActions";
 import { getNow } from "@/lib/utils";
 
@@ -161,14 +162,14 @@ export function usePosts() {
   return {
     posts,
     loading: status === "pending",
-    createPost: (content: string, code: string, tags: string[], media_url?: string, is_readme: boolean = false) => {
+    createPost: useCallback((content: string, code: string, tags: string[], media_url?: string, is_readme: boolean = false) => {
       if (!user) {
         toast.error("Please sign in to share a post");
         return;
       }
       const idempotency_key = crypto.randomUUID();
       return createPostMutation.mutateAsync({ content, code, tags, media_url, is_readme, idempotency_key });
-    },
+    }, [user, createPostMutation]),
     toggleLike,
     toggleBookmark,
     deletePost,

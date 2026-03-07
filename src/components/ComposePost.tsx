@@ -206,6 +206,8 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
             value={content}
             onChange={handleTextareaChange}
             placeholder="Share what you're building... (use #tags or @mentions)"
+            id="post-content"
+            name="content"
             className="w-full bg-transparent resize-none outline-none text-sm placeholder:text-muted-foreground min-h-[60px] custom-scrollbar"
             rows={2}
           />
@@ -271,6 +273,8 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="// Paste your code here..."
+                id="post-code"
+                name="code"
                 className="w-full bg-muted text-foreground font-mono text-xs p-3 rounded-[3px] gum-border resize-none outline-none min-h-[120px]"
                 rows={4}
               />
@@ -284,6 +288,8 @@ const ComposePost = ({ onPost }: ComposePostProps) => {
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 accept="image/*"
+                id="post-media"
+                name="media"
                 className="hidden"
               />
               <button

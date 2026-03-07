@@ -14,7 +14,7 @@ export interface Profile {
 }
 
 export function useProfile() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: profile, isLoading: loading } = useQuery({
@@ -115,7 +115,7 @@ export function useProfile() {
     }
 
     // On success, sign out locally
-    await supabase.auth.signOut();
+    await signOut({ scope: 'local' });
     queryClient.clear();
 
     return { error: null };

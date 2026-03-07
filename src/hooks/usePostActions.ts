@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useCallback } from "react";
 
 export function usePostActions() {
     const { user } = useAuth();
@@ -203,27 +204,33 @@ export function usePostActions() {
         }
     });
 
+    const toggleLike = useCallback((postId: string, currentlyLiked: boolean) => {
+        if (!user) {
+            toast.error("Please sign in to like posts");
+            return;
+        }
+        toggleLikeMutation.mutate({ postId, currentlyLiked });
+    }, [user, toggleLikeMutation]);
+
+    const toggleBookmark = useCallback((postId: string, currentlyBookmarked: boolean) => {
+        if (!user) {
+            toast.error("Please sign in to bookmark posts");
+            return;
+        }
+        toggleBookmarkMutation.mutate({ postId, currentlyBookmarked });
+    }, [user, toggleBookmarkMutation]);
+
+    const deletePost = useCallback(async (postId: string) => {
+        if (!user) {
+            toast.error("Please sign in to delete posts");
+            return;
+        }
+        return deletePostMutation.mutateAsync(postId);
+    }, [user, deletePostMutation]);
+
     return {
-        toggleLike: (postId: string, currentlyLiked: boolean) => {
-            if (!user) {
-                toast.error("Please sign in to like posts");
-                return;
-            }
-            toggleLikeMutation.mutate({ postId, currentlyLiked });
-        },
-        toggleBookmark: (postId: string, currentlyBookmarked: boolean) => {
-            if (!user) {
-                toast.error("Please sign in to bookmark posts");
-                return;
-            }
-            toggleBookmarkMutation.mutate({ postId, currentlyBookmarked });
-        },
-        async deletePost(postId: string) {
-            if (!user) {
-                toast.error("Please sign in to delete posts");
-                return;
-            }
-            return deletePostMutation.mutateAsync(postId);
-        },
+        toggleLike,
+        toggleBookmark,
+        deletePost,
     };
 }

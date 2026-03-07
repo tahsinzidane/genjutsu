@@ -306,7 +306,7 @@ const AdminPage = () => {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-10">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-8">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-4xl font-black tracking-tighter uppercase italic">
               Moderation <span className="text-primary italic">Command</span>
@@ -315,7 +315,7 @@ const AdminPage = () => {
               Secured administrative oversight and behavioral control.
             </p>
           </div>
-          <div className="flex items-center gap-3 bg-secondary/30 p-1 rounded-sm border border-white/5 backdrop-blur-md">
+          <div className="flex items-center gap-3 bg-secondary/30 p-1 rounded-sm border border-border backdrop-blur-md">
             <div className="px-3 py-1 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] uppercase font-bold tracking-widest opacity-70">Server Live</span>
@@ -325,27 +325,30 @@ const AdminPage = () => {
 
         {/* Action Confirmation Dialog */}
         <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-          <DialogContent className="rounded-none border-white/10 bg-black/90 backdrop-blur-xl border-l-4 border-l-primary gap-6 p-6 sm:p-8">
+          <DialogContent className="rounded-none border-border bg-background backdrop-blur-xl border-l-4 border-l-primary gap-6 p-6 sm:p-8">
             <DialogTitle className="sr-only">Edit User</DialogTitle>
             <DialogDescription className="sr-only">Admin tool to modify user profile details and status.</DialogDescription>
             <DialogHeader className="space-y-4">
-              <div className="bg-primary/20 p-3 w-fit">
-                <ShieldAlert className="w-6 h-6 text-primary" />
+              <div className="bg-primary/20 p-4 w-fit border-2 border-primary/40 shadow-[0_0_20px_rgba(244,63,94,0.15)] mb-2">
+                <ShieldAlert className="w-8 h-8 text-primary" strokeWidth={2.5} />
               </div>
               <div>
                 <DialogTitle className="text-2xl font-black uppercase tracking-tight italic">Authorization Required</DialogTitle>
-                <DialogDescription className="text-[10px] font-bold uppercase opacity-60">
-                  Executing protocol: <span className="text-primary">{pendingAction?.type.replace(/_/g, ' ')}</span>
+                <DialogDescription className="text-[10px] font-bold uppercase text-muted-foreground">
+                  Executing protocol: <span className="text-primary font-black underline decoration-primary/30">{pendingAction?.type.replace(/_/g, ' ')}</span>
                 </DialogDescription>
               </div>
             </DialogHeader>
 
             <div className="space-y-4">
-              <p className="text-[11px] font-bold leading-relaxed uppercase italic">
+              <p className="text-[11px] font-bold leading-relaxed uppercase italic text-muted-foreground">
                 This action is significant and will be logged. Type <span className="text-primary font-black underline">CONFIRM</span> to bypass security locks.
               </p>
               <Input
-                className="rounded-none bg-white/5 border-white/10 h-11 text-center font-black tracking-[0.2em] uppercase text-primary placeholder:opacity-20 translate-x-[2px]"
+                id="admin-confirm"
+                name="admin-confirm"
+                autoComplete="off"
+                className="rounded-none bg-background border-border h-11 text-center font-black tracking-[0.2em] uppercase text-primary placeholder:opacity-20 translate-x-[2px] focus:border-primary/50"
                 placeholder="TYPE HERE"
                 value={confirmValue}
                 onChange={(e) => setConfirmValue(e.target.value)}
@@ -355,14 +358,14 @@ const AdminPage = () => {
             <DialogFooter className="flex sm:flex-row gap-2 mt-4">
               <Button
                 variant="outline"
-                className="rounded-none h-11 flex-1 uppercase font-black text-[10px] border-white/5 hover:bg-white/5 transition-all"
+                className="rounded-none h-11 flex-1 uppercase font-black text-[10px] border-border hover:bg-secondary/10 transition-all"
                 onClick={() => setConfirmOpen(false)}
               >
                 Abort
               </Button>
               <Button
                 variant="destructive"
-                className="rounded-none h-11 flex-1 uppercase font-black text-[10px] italic shadow-[4px_4px_0px_rgba(244,63,94,0.2)] disabled:opacity-20 disabled:grayscale transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                className="rounded-none h-11 flex-1 uppercase font-black text-[10px] italic shadow-[4px_4px_0px_rgba(244,63,94,0.2)] disabled:opacity-30 disabled:grayscale transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                 disabled={confirmValue !== "CONFIRM"}
                 onClick={executeConfirmedAction}
               >
@@ -380,7 +383,7 @@ const AdminPage = () => {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           <motion.div variants={itemVariants}>
-            <Card className="rounded-none border-white/5 bg-secondary/20 hover:bg-secondary/40 transition-all duration-300 overflow-hidden relative group">
+            <Card className="rounded-none border-border bg-secondary/20 hover:bg-secondary/40 transition-all duration-300 overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity translate-x-4 -translate-y-4">
                 <Users className="w-24 h-24" />
               </div>
@@ -395,7 +398,7 @@ const AdminPage = () => {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="rounded-none border-white/5 bg-secondary/20 hover:bg-secondary/40 transition-all duration-300 overflow-hidden relative group">
+            <Card className="rounded-none border-border bg-secondary/20 hover:bg-secondary/40 transition-all duration-300 overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity translate-x-4 -translate-y-4">
                 <FileCode2 className="w-24 h-24" />
               </div>
@@ -410,7 +413,7 @@ const AdminPage = () => {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="rounded-none border-white/5 bg-secondary/20 hover:bg-secondary/40 transition-all duration-300 overflow-hidden relative group">
+            <Card className="rounded-none border-border bg-secondary/20 hover:bg-secondary/40 transition-all duration-300 overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity translate-x-4 -translate-y-4">
                 <MessageCircle className="w-24 h-24" />
               </div>
@@ -427,7 +430,7 @@ const AdminPage = () => {
 
         <Tabs defaultValue="posts" className="w-full space-y-6 sm:space-y-8">
           <div className="overflow-x-auto scrollbar-hide">
-            <TabsList className="bg-transparent border-b border-white/5 w-full min-w-max justify-start gap-4 sm:gap-8 rounded-none h-auto p-0 pb-2">
+            <TabsList className="bg-transparent border-b border-border w-full min-w-max justify-start gap-4 sm:gap-8 rounded-none h-auto p-0 pb-2">
               <TabsTrigger value="posts" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 pb-2 h-auto text-[10px] sm:text-[11px] uppercase font-black tracking-widest transition-all hover:text-primary">
                 <LayoutDashboard className="w-3 h-3 mr-2" />
                 Live Posts
@@ -446,8 +449,8 @@ const AdminPage = () => {
 
           {/* Posts Tab */}
           <TabsContent value="posts" className="space-y-4 m-0 transition-all">
-            <Card className="rounded-none border-white/5 bg-secondary/10 overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between border-b border-white/5 py-4">
+            <Card className="rounded-none border-border bg-secondary/10 overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-border py-4">
                 <div className="space-y-0.5">
                   <CardTitle className="text-xs uppercase font-black tracking-widest flex items-center gap-2">
                     Operational Feed
@@ -457,7 +460,7 @@ const AdminPage = () => {
               </CardHeader>
               <CardContent className="p-0">
                 {/* Mobile Card View */}
-                <div className="md:hidden divide-y divide-white/5">
+                <div className="md:hidden divide-y divide-border">
                   {postsLoading ? (
                     <div className="p-10 text-center text-[10px] uppercase font-black opacity-30 italic">Retrieving stream...</div>
                   ) : posts.length === 0 ? (
@@ -496,8 +499,8 @@ const AdminPage = () => {
                 {/* Desktop Table View */}
                 <div className="hidden md:block overflow-x-auto">
                   <Table>
-                    <TableHeader className="bg-secondary/20">
-                      <TableRow className="border-white/5 hover:bg-transparent">
+                    <TableHeader className="bg-secondary/20 border-b border-border">
+                      <TableRow className="border-border hover:bg-transparent">
                         <TableHead className="text-[10px] uppercase font-black tracking-widest text-muted-foreground py-3 h-auto">Entity</TableHead>
                         <TableHead className="text-[10px] uppercase font-black tracking-widest text-muted-foreground py-3 h-auto">Payload</TableHead>
                         <TableHead className="text-[10px] uppercase font-black tracking-widest text-muted-foreground py-3 h-auto">Timestamp</TableHead>
@@ -511,7 +514,7 @@ const AdminPage = () => {
                         <TableRow className="hover:bg-transparent"><TableCell colSpan={4} className="text-center py-10 text-[11px] uppercase font-bold opacity-50 italic">No activity detected.</TableCell></TableRow>
                       ) : (
                         posts.map((post) => (
-                          <TableRow key={post.id} className="border-white/5 group transition-colors">
+                          <TableRow key={post.id} className="border-border group transition-colors hover:bg-secondary/10">
                             <TableCell className="py-4">
                               <div className="flex flex-col">
                                 <span className="text-xs font-black uppercase italic tracking-tight">
@@ -526,7 +529,7 @@ const AdminPage = () => {
                               <p className="text-[11px] font-medium leading-relaxed max-w-md line-clamp-2 opacity-80">{post.content}</p>
                             </TableCell>
                             <TableCell className="py-4">
-                              <div className="flex items-center gap-2 text-[10px] font-bold opacity-60">
+                              <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground">
                                 <Clock className="w-3 h-3 text-primary" />
                                 {new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </div>
@@ -558,7 +561,7 @@ const AdminPage = () => {
             <div className="flex flex-col lg:flex-row gap-6">
               {/* Controls Column */}
               <div className="w-full lg:w-80 space-y-6 shrink-0">
-                <Card className="rounded-none border-white/5 bg-secondary/10">
+                <Card className="rounded-none border-border bg-secondary/5">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-[11px] uppercase font-black tracking-widest flex items-center gap-2">
                       Targeting Filters
@@ -568,23 +571,25 @@ const AdminPage = () => {
                     <div className="relative">
                       <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                       <Input
+                        id="user-search"
+                        name="user-search"
                         placeholder="Search Identification..."
-                        className="pl-9 h-10 rounded-none bg-background/50 border-white/5 text-[11px] font-bold"
+                        className="pl-9 h-10 rounded-none bg-background/50 border-border text-[11px] font-bold"
                         value={userSearchText}
                         onChange={(e) => setUserSearchText(e.target.value)}
                       />
                     </div>
 
                     <div className="space-y-4 pt-2">
-                      <h4 className="text-[10px] uppercase font-black tracking-widest text-primary/70">Ban Scope Definition</h4>
+                      <h4 className="text-[10px] uppercase font-black tracking-widest text-primary">Ban Scope Definition</h4>
                       <div className="space-y-3">
                         {[
                           { id: "content", label: "Posts & Comments", state: blockContent, setter: setBlockContent },
                           { id: "social", label: "Interactions (Likes/Follow)", state: blockSocial, setter: setBlockSocial },
                           { id: "messages", label: "Private Whispers", state: blockMessages, setter: setBlockMessages },
                         ].map((scope) => (
-                          <label key={scope.id} className="flex items-center justify-between p-3 border border-white/5 bg-background/30 cursor-pointer hover:bg-background/50 transition-colors">
-                            <span className="text-[10px] font-bold uppercase tracking-tight">{scope.label}</span>
+                          <label key={scope.id} className="flex items-center justify-between p-3 border border-border bg-background/30 cursor-pointer hover:bg-background/50 transition-colors">
+                            <span className="text-[10px] font-bold uppercase tracking-tight text-foreground">{scope.label}</span>
                             <div
                               onClick={() => scope.setter(!scope.state)}
                               className={`w-4 h-4 border-2 flex items-center justify-center transition-all ${scope.state ? 'bg-primary border-primary' : 'border-white/10'}`}
@@ -598,12 +603,12 @@ const AdminPage = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="rounded-none border-white/5 bg-primary/5 p-4 border-l-4 border-l-primary">
+                <Card className="rounded-none border-border bg-primary/5 p-4 border-l-4 border-l-primary">
                   <div className="flex gap-3">
                     <ShieldAlert className="w-5 h-5 text-primary shrink-0" />
                     <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase tracking-widest leading-tight">Admin Protocol</p>
-                      <p className="text-[9px] font-bold leading-tight uppercase italic opacity-60">
+                      <p className="text-[10px] font-black uppercase tracking-widest leading-tight text-foreground">Admin Protocol</p>
+                      <p className="text-[9px] font-bold leading-tight uppercase italic text-muted-foreground/80">
                         Sanctions applied here are absolute. Actions are logged and permanent.
                       </p>
                     </div>
@@ -613,10 +618,10 @@ const AdminPage = () => {
 
               {/* Users List Column */}
               <div className="flex-1 min-w-0">
-                <Card className="rounded-none border-white/5 bg-secondary/10 overflow-hidden">
+                <Card className="rounded-none border-border bg-secondary/5 overflow-hidden">
                   <CardContent className="p-0">
                     {/* Mobile Card View */}
-                    <div className="md:hidden divide-y divide-white/5">
+                    <div className="md:hidden divide-y divide-border">
                       {usersLoading ? (
                         <div className="p-10 text-center text-[10px] uppercase font-black opacity-30 italic">Decrypting registry...</div>
                       ) : filteredAllUsers.length === 0 ? (
@@ -625,11 +630,11 @@ const AdminPage = () => {
                         filteredAllUsers.map((user) => {
                           const banned = isBanned(user);
                           return (
-                            <div key={user.id} className="p-4 space-y-4 bg-secondary/10">
+                            <div key={user.id} className="p-4 space-y-4 bg-secondary/5">
                               <div className="flex justify-between items-center">
                                 <div className="flex flex-col">
                                   <span className="text-xs font-black uppercase italic">{user.display_name}</span>
-                                  <span className="text-[10px] font-bold opacity-60">@{user.username}</span>
+                                  <span className="text-[10px] font-bold text-muted-foreground">@{user.username}</span>
                                 </div>
                                 {banned ? (
                                   <Badge variant="destructive" className="rounded-none text-[8px] font-black uppercase italic px-1.5 py-0">Restricted</Badge>
@@ -656,7 +661,7 @@ const AdminPage = () => {
                                         key={duration}
                                         size="sm"
                                         variant={duration === "7d" ? "destructive" : "outline"}
-                                        className={`h-8 rounded-none text-[9px] font-black uppercase border-white/5 active:scale-95 transition-all ${duration !== '7d' ? 'active:bg-primary/20 active:text-primary active:border-primary/50' : ''}`}
+                                        className={`h-8 rounded-none text-[9px] font-black uppercase border-border active:scale-95 transition-all ${duration !== '7d' ? 'active:bg-primary/20 active:text-primary active:border-primary/50' : ''}`}
                                         onClick={() => triggerBanConfirm(
                                           user.user_id,
                                           duration === '1h' ? 60 : duration === '24h' ? 1440 : 10080,
@@ -679,8 +684,8 @@ const AdminPage = () => {
                     {/* Desktop Table View */}
                     <div className="hidden md:block">
                       <Table>
-                        <TableHeader className="bg-secondary/20">
-                          <TableRow className="border-white/5 hover:bg-transparent">
+                        <TableHeader className="bg-secondary/20 border-b border-border">
+                          <TableRow className="border-border hover:bg-transparent">
                             <TableHead className="text-[10px] uppercase font-black tracking-widest text-muted-foreground py-3 h-auto">Subject</TableHead>
                             <TableHead className="text-[10px] uppercase font-black tracking-widest text-muted-foreground py-3 h-auto">Status</TableHead>
                             <TableHead className="text-right text-[10px] uppercase font-black tracking-widest text-muted-foreground py-3 h-auto">Ban Application</TableHead>
@@ -695,11 +700,11 @@ const AdminPage = () => {
                             filteredAllUsers.map((user) => {
                               const banned = isBanned(user);
                               return (
-                                <TableRow key={user.id} className="border-white/5 group hover:bg-white/[0.02]">
+                                <TableRow key={user.id} className="border-border group hover:bg-secondary/10">
                                   <TableCell className="py-4">
                                     <div className="flex flex-col">
                                       <span className="text-xs font-black uppercase italic italic">{user.display_name}</span>
-                                      <span className="text-[10px] font-bold opacity-60">@{user.username}</span>
+                                      <span className="text-[10px] font-bold text-muted-foreground">@{user.username}</span>
                                     </div>
                                   </TableCell>
                                   <TableCell className="py-4">
@@ -734,7 +739,7 @@ const AdminPage = () => {
                                             key={duration}
                                             size="sm"
                                             variant={duration === "7d" ? "destructive" : "outline"}
-                                            className={`h-8 rounded-none text-[9px] font-black uppercase border-white/5 hover:scale-105 transition-transform ${duration !== '7d' ? 'hover:bg-primary/20 hover:text-primary hover:border-primary/50' : ''}`}
+                                            className={`h-8 rounded-none text-[9px] font-black uppercase border-border hover:scale-105 transition-transform ${duration !== '7d' ? 'hover:bg-primary/20 hover:text-primary hover:border-primary/50' : ''}`}
                                             onClick={() => triggerBanConfirm(
                                               user.user_id,
                                               duration === '1h' ? 60 : duration === '24h' ? 1440 : 10080,

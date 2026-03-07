@@ -335,6 +335,8 @@ const PostPage = () => {
                                                 <div className="flex-1 relative">
                                                     <textarea
                                                         ref={textareaRef}
+                                                        id="comment-content"
+                                                        name="comment"
                                                         value={commentText}
                                                         onChange={handleTextareaChange}
                                                         placeholder="Add your reflection..."

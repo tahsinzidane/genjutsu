@@ -8,11 +8,11 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
-  signUp: (email: string, password: string, username: string, displayName: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, username: string, displayName: string) => Promise<{ data: { user: User | null; session: Session | null } | null; error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signInWithGitHub: () => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
+  signOut: (options?: { scope?: 'global' | 'local' | 'others' }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, username: string, displayName: string) => {
+  const signUp = async (email: string, password: string, username: string, displayName: string): Promise<{ data: { user: User | null; session: Session | null } | null; error: any }> => {
     // Check if username is already taken before attempting signup
     const { data: existingProfile } = await supabase
       .from("profiles")
@@ -113,11 +113,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .maybeSingle();
 
     if (existingProfile) {
-      return { error: { message: "this_username_is_taken" } };
+      return { data: { user: null, session: null }, error: { message: "this_username_is_taken" } };
     }
 
     const redirectUrl = `${window.location.origin}/`;
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -128,7 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       },
     });
-    return { error };
+    return { data, error };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -156,8 +156,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const signOut = async (options?: { scope?: 'global' | 'local' | 'others' }) => {
+    try {
+      await supabase.auth.signOut(options);
+    } catch (error) {
+      console.error("Error during signOut:", error);
+    } finally {
+      // Clear session from local state regardless of server result
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+    }
   };
 
   return (

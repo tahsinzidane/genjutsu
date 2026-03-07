@@ -44,7 +44,7 @@ const AuthPage = () => {
     try {
       if (isSignUp) {
         const parsed = signUpSchema.parse({ email, password, username, displayName });
-        const { error } = await signUp(parsed.email, parsed.password, parsed.username, parsed.displayName);
+        const { data, error } = await signUp(parsed.email, parsed.password, parsed.username, parsed.displayName);
         if (error) {
           if (error.message?.includes("already registered")) {
             setError("This email is already registered. Try signing in instead.");
@@ -55,8 +55,12 @@ const AuthPage = () => {
           } else {
             setError(error.message || "Sign up failed");
           }
+        } else if (!data?.session) {
+          // Email confirmation is enabled
+          setSuccess("Genjutsu initiated! Check your email (and spam) to confirm the illusion. If it doesn't arrive, try continuing with Google or GitHub.");
         } else {
-          setSuccess("Check your email to confirm your account, then sign in! If it doesn't arrive within a few minutes, try signing up with Google or GitHub instead.");
+          // Logged in immediately (confirmation disabled)
+          navigate("/");
         }
       } else {
         const parsed = signInSchema.parse({ email, password });
@@ -65,7 +69,7 @@ const AuthPage = () => {
           if (error.message?.includes("Invalid login")) {
             setError("Invalid email or password.");
           } else if (error.message?.includes("Email not confirmed")) {
-            setError("Please confirm your email before signing in.");
+            setError("Please confirm your email before signing in. Check your spam, or try signing in with Google or GitHub instead.");
           } else if (error.message?.toLowerCase().includes("rate limit") || error.message?.toLowerCase().includes("too many requests")) {
             setError("Email limit reached. Please try again later or sign in with Google or GitHub.");
           } else {
@@ -328,12 +332,15 @@ const AuthPage = () => {
                               Username
                             </label>
                             <input
+                              id="username"
+                              name="username"
                               type="text"
                               value={username}
                               onChange={(e) => setUsername(e.target.value)}
                               placeholder="cooldev42"
                               className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-[3px] text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
                               required
+                              autoComplete="username"
                             />
                           </div>
                           <div>
@@ -341,6 +348,8 @@ const AuthPage = () => {
                               Display Name
                             </label>
                             <input
+                              id="display_name"
+                              name="display_name"
                               type="text"
                               value={displayName}
                               onChange={(e) => setDisplayName(e.target.value)}
@@ -357,12 +366,15 @@ const AuthPage = () => {
                           Email
                         </label>
                         <input
+                          id="email"
+                          name="email"
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="you@dev.com"
                           className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-[3px] text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
                           required
+                          autoComplete="email"
                         />
                       </div>
 
@@ -372,12 +384,15 @@ const AuthPage = () => {
                         </label>
                         <div className="relative">
                           <input
+                            id="password"
+                            name="password"
                             type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
                             className="w-full px-4 py-3 bg-secondary/30 gum-border rounded-[3px] text-sm outline-none focus:ring-2 focus:ring-primary/20 pr-12 transition-all placeholder:text-muted-foreground/30"
                             required
+                            autoComplete={isSignUp ? "new-password" : "current-password"}
                           />
                           <button
                             type="button"
