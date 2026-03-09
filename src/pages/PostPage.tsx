@@ -402,7 +402,7 @@ const PostPage = () => {
                                                                 </span>
 
                                                                 {/* Only show menu if the logged-in user is the author of the comment OR the author of the post */}
-                                                                {(user?.id === comment.user_id || (post && user.id === post.user_id)) && (
+                                                                {(user?.id === comment.user_id || (post && user?.id === post.user_id)) && (
                                                                     <div className="relative ml-auto">
                                                                         <button
                                                                             type="button"
