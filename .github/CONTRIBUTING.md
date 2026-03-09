@@ -58,6 +58,8 @@ cp .env.example .env
 # it should already be in .gitignore
 ```
 
+> **Note on Google OAuth:** You do **not** need to add Google Client IDs to the `.env` file for Supabase Google authentication to work. Go to your Supabase Project Dashboard -> Authentication -> Providers -> Google, and enter your credentials there. The Supabase JS Client handles the redirect automatically!
+
 ### database setup
 
 the quickest way to set up your database is using the consolidated `init.sql` script.
@@ -68,6 +70,10 @@ the quickest way to set up your database is using the consolidated `init.sql` sc
 2. navigate to the **sql editor**.
 3. copy the entire content of `supabase/init.sql` and run it.
 4. this handles all tables, extensions, rpcs, and security policies in one go.
+5. *(required for auto-cleanup tasks)*: genjutsu uses `pg_cron` to delete 24-hour-old data. to allow the cron to clean up storage files automatically, you must add your `service_role` key to the supabase vault. run this snippet in your sql editor:
+   ```sql
+   select vault.create_secret('supabase_service_role_key', 'your_service_role_key');
+   ```
 
 **option 2: local development with supabase cli**
 

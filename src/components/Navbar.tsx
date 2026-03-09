@@ -195,10 +195,19 @@ const Navbar = () => {
                       <span>Admin</span>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={() => navigate(`/${profile?.username}`)} className="cursor-pointer">
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      if (profile?.username) {
+                        navigate(`/${profile.username}`);
+                      }
+                    }} 
+                    className={`cursor-pointer ${!profile?.username ? 'opacity-50' : ''}`}
+                    disabled={!profile?.username}
+                  >
                     <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                    <span>{profile?.username ? 'Profile' : 'Loading...'}</span>
                   </DropdownMenuItem>
+
                   <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
