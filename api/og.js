@@ -2,14 +2,24 @@ export const config = { runtime: 'edge' };
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const APP_URL = 'https://genjutsu-social.vercel.app'; // Production URL
+const APP_URL = 'https://genjutsu-social.vercel.app';
+
+// Helper to prevent XSS in injected content
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 export default async function handler(req) {
     const { searchParams } = new URL(req.url);
     const postId = searchParams.get('postId');
     const usernameParam = searchParams.get('username');
 
-    // If neither is provided, fail early
     if (!postId && !usernameParam) {
         return new Response('Missing target', { status: 400 });
     }
@@ -19,11 +29,12 @@ export default async function handler(req) {
         let description = 'The 24 hour social network for developers.';
         let image = `${APP_URL}/fav.jpg`;
         let targetUrl = APP_URL;
+        let bodyContent = '';
 
         // --- HANDLE POSTS ---
         if (postId) {
             const res = await fetch(
-                `${SUPABASE_URL}/rest/v1/posts?id=eq.${postId}&select=content,media_url,profiles(display_name,username,avatar_url)`,
+                `${SUPABASE_URL}/rest/v1/posts?id=eq.${postId}&select=content,code,media_url,profiles(display_name,username,avatar_url)`,
                 {
                     headers: {
                         apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -39,17 +50,35 @@ export default async function handler(req) {
                 return new Response('Post not found', { status: 404 });
             }
 
-            title = `${post.profiles?.display_name || 'Someone'} on Genjutsu`;
+            const displayName = post.profiles?.display_name || 'Someone';
+            const username = post.profiles?.username || '';
+            const avatarUrl = post.profiles?.avatar_url || '';
 
-            // Better text extraction, removing markdown hashtags/codeblocks visually if short
-            description = post.content ? (post.content.length > 200 ? post.content.substring(0, 200) + '...' : post.content) : 'View this post on Genjutsu.';
-
-            image = post.media_url || post.profiles?.avatar_url || `${APP_URL}/fav.jpg`;
+            title = `${displayName} on Genjutsu`;
+            description = post.content
+                ? (post.content.length > 200 ? post.content.substring(0, 200) + '...' : post.content)
+                : 'View this post on Genjutsu.';
+            image = post.media_url || avatarUrl || `${APP_URL}/fav.jpg`;
             targetUrl = `${APP_URL}/post/${postId}`;
+
+            bodyContent = `
+                <div id="ssr-content" style="font-family:sans-serif;max-width:680px;margin:40px auto;padding:0 20px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                        ${avatarUrl ? `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;" />` : ''}
+                        <div>
+                            <strong>${escapeHtml(displayName)}</strong>
+                            <span style="color:#888;margin-left:6px;">@${escapeHtml(username)}</span>
+                        </div>
+                    </div>
+                    <p style="font-size:16px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(post.content || '')}</p>
+                    ${post.code ? `<pre style="background:#111;color:#eee;padding:16px;border-radius:6px;overflow:auto;font-size:13px;"><code>${escapeHtml(post.code)}</code></pre>` : ''}
+                    ${post.media_url ? `<img src="${escapeHtml(post.media_url)}" alt="Post media" style="max-width:100%;border-radius:6px;margin-top:12px;" />` : ''}
+                    <p style="color:#888;font-size:12px;margin-top:16px;">Posted on <a href="${APP_URL}">Genjutsu</a> — the 24 hour social network</p>
+                </div>
+            `;
         }
         // --- HANDLE PROFILES ---
         else if (usernameParam) {
-            // Decode URL encoding in case it exists (e.g. %40username) and strip leading @ if present
             const cleanUsername = usernameParam.replace(/^@/, '');
 
             const res = await fetch(
@@ -66,14 +95,29 @@ export default async function handler(req) {
             const profile = data[0];
 
             if (!profile) {
-                // Fallback gracefully to default if no user found but still give the URL
                 targetUrl = `${APP_URL}/${cleanUsername}`;
             } else {
                 const displayName = profile.display_name || cleanUsername;
                 title = `${displayName} (@${cleanUsername}) on Genjutsu`;
-                description = profile.bio ? (profile.bio.length > 160 ? profile.bio.substring(0, 160) + '...' : profile.bio) : `Check out ${displayName}'s profile on Genjutsu, the 24-hour developer social network.`;
+                description = profile.bio
+                    ? (profile.bio.length > 160 ? profile.bio.substring(0, 160) + '...' : profile.bio)
+                    : `Check out ${displayName}'s profile on Genjutsu, the 24-hour developer social network.`;
                 image = profile.avatar_url || `${APP_URL}/fav.jpg`;
                 targetUrl = `${APP_URL}/${cleanUsername}`;
+
+                bodyContent = `
+                    <div id="ssr-content" style="font-family:sans-serif;max-width:680px;margin:40px auto;padding:0 20px;">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                            ${profile.avatar_url ? `<img src="${escapeHtml(profile.avatar_url)}" alt="${escapeHtml(displayName)}" style="width:60px;height:60px;border-radius:4px;object-fit:cover;" />` : ''}
+                            <div>
+                                <h1 style="margin:0;font-size:20px;">${escapeHtml(displayName)}</h1>
+                                <span style="color:#888;">@${escapeHtml(cleanUsername)}</span>
+                            </div>
+                        </div>
+                        ${profile.bio ? `<p style="font-size:15px;line-height:1.6;">${escapeHtml(profile.bio)}</p>` : ''}
+                        <p style="color:#888;font-size:12px;margin-top:16px;">View profile on <a href="${escapeHtml(targetUrl)}">Genjutsu</a></p>
+                    </div>
+                `;
             }
         }
 
@@ -81,7 +125,6 @@ export default async function handler(req) {
         const indexRes = await fetch(`${APP_URL}/index.html`);
         let html = await indexRes.text();
 
-        // Prepare the meta tags block
         const metaBlock = `
   <title>${title}</title>
   <meta name="title" content="${title}">
@@ -98,15 +141,12 @@ export default async function handler(req) {
   <meta name="twitter:image" content="${image}" />
 `;
 
-        // We clean ALL existing static SEO/OG/Twitter tags to avoid duplicates
-        // which can confuse some crawlers (like Discord/Telegram).
         html = html.replace(/<title>.*?<\/title>/gi, '');
         html = html.replace(/<meta name="description".*?>/gi, '');
         html = html.replace(/<meta property="og:.*?".*?>/gi, '');
         html = html.replace(/<meta name="twitter:.*?".*?>/gi, '');
-
-        // Inject our fresh dynamic block into the head
         html = html.replace('</head>', `${metaBlock}</head>`);
+        html = html.replace('<div id="root"></div>', `${bodyContent}<div id="root"></div>`);
 
         return new Response(html, {
             headers: {
