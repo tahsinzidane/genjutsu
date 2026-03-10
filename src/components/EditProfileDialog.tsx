@@ -182,7 +182,7 @@ const EditProfileDialog = ({ currentProfile, onUpdate }: EditProfileDialogProps)
         if (!songQuery.trim()) return;
         setSearching(true);
         try {
-            const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(songQuery)}&entity=song&limit=5`);
+            const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(songQuery)}&entity=song&limit=20`);
             const data = await response.json();
             setSearchResults(data.results || []);
         } catch (error) {
